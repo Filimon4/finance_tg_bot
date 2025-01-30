@@ -23,9 +23,16 @@ async def inline_message(message: Message):
   ])
   await message.answer(text='inline', reply_markup=inlineKeyboard)
 
-@BotDispatcher.callback_query()
+@BotDispatcher.callback_query(lambda x: x.data == '1')
 async def callback_query_handler(callback_query: CallbackQuery):
-  print('Data: ', callback_query.id, callback_query.from_user.id, callback_query.data)
+  print('Data 1: ', callback_query.id, callback_query.from_user.id, callback_query.data)
+  await MainBotTg.answer_callback_query(
+    callback_query_id=callback_query.id, 
+    text='callback_query_handler',
+  )
+@BotDispatcher.callback_query(lambda x: x.data == '2')
+async def callback_query_handler(callback_query: CallbackQuery):
+  print('Data 2: ', callback_query.id, callback_query.from_user.id, callback_query.data)
   await MainBotTg.answer_callback_query(
     callback_query_id=callback_query.id, 
     text='callback_query_handler',

@@ -3,3 +3,6 @@ ujson # для использования json
 structlog # логирование
 pydantic # валидация данных (объектов и т.п.)
 python-dotenv # .env файл
+
+tortoise_orm # orm
+asyncpg # драйвер для postgres
