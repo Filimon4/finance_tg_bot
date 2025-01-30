@@ -1,5 +1,7 @@
 import asyncio
 import os
+from dotenv import load_dotenv
+load_dotenv()
 from core import MainBotTg, BotDispatcher
 
 from utils.loadModulesByRegex import load_modules_by_regex
