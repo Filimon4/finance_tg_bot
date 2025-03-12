@@ -5,7 +5,7 @@ load_dotenv()
 from core import MainBotTg, BotDispatcher
 
 from utils.loadModulesByRegex import load_modules_by_regex
-load_modules_by_regex(os.path.dirname('src/routes'), r'routes.py')
+load_modules_by_regex(os.path.dirname('src/routes'), r'routes.py') # авто-загрузка всех routes приложения
 
 async def main():
     print()
