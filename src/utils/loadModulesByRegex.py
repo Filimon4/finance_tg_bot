@@ -11,22 +11,19 @@ def load_modules_by_regex(directory, pattern):
     """
     regex = re.compile(pattern)
 
-    # Проходим по всем файлам и подкаталогам
     for root, dirs, files in os.walk(directory):
         for filename in files:
             if filename.endswith('.py') and filename != '__init__.py' and regex.match(filename):
                 print(filename)
-                module_name = os.path.splitext(filename)[0]  # Убираем расширение .py
+                module_name = os.path.splitext(filename)[0]
                 module_path = os.path.relpath(root, directory).replace(os.sep, '.')
                 
                 if module_path == '.':
-                    module_path = module_name  # Если файл в основной директории пакета
+                    module_path = module_name
 
-                # Строим путь к модулю для импорта
                 full_module_path = f"{module_path}.{module_name}"
                 
                 try:
-                    # Импортируем модуль
                     print(f"Импортируем модуль: {full_module_path}")
                     importlib.import_module(full_module_path)
                 except ImportError as e:

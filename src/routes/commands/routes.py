@@ -8,7 +8,6 @@ async def start(message: Message):
   keyboard = ReplyKeyboardMarkup(resize_keyboard=True, keyboard=KeyboardButtons[BotTgCommands.START], is_persistent=True)
   await message.answer(text='start command', reply_markup=keyboard)
 
-
 @BotDispatcher.message(IsReplyButtonFilter(BotTgCommands.START))
 async def reply(message: Message):
   await message.answer(text='reply command')
@@ -30,6 +29,7 @@ async def callback_query_handler(callback_query: CallbackQuery):
     callback_query_id=callback_query.id, 
     text='callback_query_handler',
   )
+  
 @BotDispatcher.callback_query(lambda x: x.data == '2')
 async def callback_query_handler(callback_query: CallbackQuery):
   print('Data 2: ', callback_query.id, callback_query.from_user.id, callback_query.data)
