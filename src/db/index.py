@@ -3,23 +3,25 @@ from sqlalchemy.orm import DeclarativeBase, sessionmaker, Session
 from sqlalchemy import create_engine, URL
 from typing import ClassVar, Type
 
-class DBSinglton():
+
+class DBSinglton:
     """
-        Общая обёртка над базой данных
+    Общая обёртка над базой данных
     """
+
     url_object = URL.create(
         "postgresql",
-        username=os.getenv('DB_USERNAME'),
-        password=os.getenv('DB_PASSWORD'),
-        host=os.getenv('DB_HOST'),
-        database=os.getenv('DB_NAME'),
-        port=os.getenv('DB_PORT')
+        username=os.getenv("DB_USERNAME"),
+        password=os.getenv("DB_PASSWORD"),
+        host=os.getenv("DB_HOST"),
+        database=os.getenv("DB_NAME"),
+        port=os.getenv("DB_PORT"),
     )
 
-    session: ClassVar[Type[Session]]    
+    session: ClassVar[Type[Session]]
 
     def __init__(self):
-        print('--- БД')
+        print("--- БД")
         try:
             self.engine = create_engine(DBSinglton.url_object)
             self.session = sessionmaker(bind=self.engine)()
@@ -41,12 +43,16 @@ class DBSinglton():
     def getSession(self):
         return self.session
 
+
 DB = DBSinglton()
+
 
 class Base(DeclarativeBase):
     """
-        Обёртка над DeclarativeBase. Применять ко всем моделям бд
+    Обёртка над DeclarativeBase. Применять ко всем моделям бд
     """
+
     pass
+
 
 Base.metadata.create_all(DB.engine)

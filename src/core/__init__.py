@@ -4,9 +4,9 @@ from .dispatcher.BotDispathcer import BotDispatcher
 from .filters.ReplyKeyboardFilter import IsReplyButtonFilter
 
 __all__ = [
-    'MainBotTg', 
-    'BotDispatcher', 
-    'BotTgCommands', 
-    'KeyboardButtons',
-    'IsReplyButtonFilter',
+    "MainBotTg",
+    "BotDispatcher",
+    "BotTgCommands",
+    "KeyboardButtons",
+    "IsReplyButtonFilter",
 ]
