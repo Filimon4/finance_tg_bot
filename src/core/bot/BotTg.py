@@ -6,7 +6,9 @@ from core.config.enums.BotTgCommands import BotTgCommands
 
 class BotTg(Bot):
     commands = [
-        BotCommand(command=f"/{BotTgCommands.START.value}", description="Запуск бота"),
+        BotCommand(
+            command=f"/{BotTgCommands.START.value}", description="Запуск бота"
+        ),
     ]
 
     def __init__(self, *args, **kwargs):

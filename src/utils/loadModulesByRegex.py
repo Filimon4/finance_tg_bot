@@ -21,7 +21,9 @@ def load_modules_by_regex(directory, pattern):
             ):
                 print(filename)
                 module_name = os.path.splitext(filename)[0]
-                module_path = os.path.relpath(root, directory).replace(os.sep, ".")
+                module_path = os.path.relpath(root, directory).replace(
+                    os.sep, "."
+                )
 
                 if module_path == ".":
                     module_path = module_name

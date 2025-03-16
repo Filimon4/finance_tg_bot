@@ -49,7 +49,10 @@ async def inline_message(message: Message):
 @BotDispatcher.callback_query(lambda x: x.data == "1")
 async def callback_query_handler(callback_query: CallbackQuery):
     print(
-        "Data 1: ", callback_query.id, callback_query.from_user.id, callback_query.data
+        "Data 1: ",
+        callback_query.id,
+        callback_query.from_user.id,
+        callback_query.data,
     )
     await MainBotTg.answer_callback_query(
         callback_query_id=callback_query.id,
@@ -60,7 +63,10 @@ async def callback_query_handler(callback_query: CallbackQuery):
 @BotDispatcher.callback_query(lambda x: x.data == "2")
 async def callback_query_handler(callback_query: CallbackQuery):
     print(
-        "Data 2: ", callback_query.id, callback_query.from_user.id, callback_query.data
+        "Data 2: ",
+        callback_query.id,
+        callback_query.from_user.id,
+        callback_query.data,
     )
     await MainBotTg.answer_callback_query(
         callback_query_id=callback_query.id,

@@ -3,6 +3,9 @@ from aiogram.types import KeyboardButton
 
 KeyboardButtons = {
     BotTgCommands.START: [
-        [KeyboardButton(text="Нажми меня"), KeyboardButton(text="Нажми меня тоже")]
+        [
+            KeyboardButton(text="Нажми меня"),
+            KeyboardButton(text="Нажми меня тоже"),
+        ]
     ]
 }
