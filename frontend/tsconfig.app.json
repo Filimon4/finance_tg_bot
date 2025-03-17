@@ -20,7 +20,16 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    "baseUrl": "./",
+    "paths": {
+      "@components/*": ["src/components/*"],
+      "@shared/*": ["src/shared/*"],
+      "@pages/*": ["src/pages/*"],
+      "@variables/*": ["src/shared/styles/variables.module.scss"],
+      "@mixins/*": ["src/shared/styles/mixins.scss"],
+      "@images/*": ["public/images/*"]
+    }
   },
   "include": ["src"]
 }
