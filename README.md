@@ -39,3 +39,13 @@ load_modules_by_regex(os.path.dirname('src/routes'), r'routes.py')
 ```cmd
 black .
 ```
+
+## Миграции к бд
+Генерация миграции
+```cmd
+alembic revision --autogenerate -m "Your changes"
+```
+Испоненеи мигарации
+```cmd
+alembic upgrade head
+```
