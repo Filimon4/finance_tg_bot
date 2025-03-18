@@ -19,7 +19,6 @@ def load_modules_by_regex(directory, pattern):
                 and filename != "__init__.py"
                 and regex.match(filename)
             ):
-                print(filename)
                 module_name = os.path.splitext(filename)[0]
                 module_path = os.path.relpath(root, directory).replace(
                     os.sep, "."

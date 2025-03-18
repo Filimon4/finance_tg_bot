@@ -7,6 +7,10 @@ python -m venv venv
 
 pip install -r requirements.txt
 ```
+# Запуск
+```py
+python ./src/index.py
+```
 
 # Архитектура проекта
 
@@ -41,11 +45,17 @@ black .
 ```
 
 ## Миграции к бд
+Добавление метаданных. В файлике alemibic/env.py нужно добавить метадату таблиц которые были добавленны.
+```py
+target_metadata = [
+    User.metadata,
+]
+```
 Генерация миграции
 ```cmd
 alembic revision --autogenerate -m "Your changes"
 ```
-Испоненеи мигарации
+Исполненеи мигарации
 ```cmd
 alembic upgrade head
 ```

@@ -3,7 +3,7 @@ from aiogram.filters import BaseFilter
 from aiogram.types.message import Message
 
 
-class IsReplyButtonFilter(BaseFilter):
+class ReplyButtonFilter(BaseFilter):
     def __init__(self, keyboardType: BotTgCommands):
         self.keyboardType = keyboardType
 
