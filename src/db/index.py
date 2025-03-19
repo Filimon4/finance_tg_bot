@@ -23,10 +23,9 @@ class DBSinglton:
     session: ClassVar[Type[Session]]
 
     def __init__(self):
-        print("--- БД")
+        print("--- BD")
         try:
             self.engine = create_engine(DBSinglton.url_object)
-            print(self.engine.url)
             self.session = sessionmaker(bind=self.engine)()
         except Exception as e:
             print("Ошибка подключения ", e)
