@@ -1,8 +1,5 @@
 import asyncio
 import os
-from dotenv import load_dotenv
-
-load_dotenv()
 from db import DB
 
 from core import MainBotTg, BotDispatcher

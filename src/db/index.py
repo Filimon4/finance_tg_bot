@@ -2,7 +2,9 @@ import os
 from sqlalchemy.orm import DeclarativeBase, sessionmaker, Session
 from sqlalchemy import create_engine, URL
 from typing import ClassVar, Type
+from dotenv import load_dotenv
 
+load_dotenv()
 
 class DBSinglton:
     """
@@ -24,9 +26,10 @@ class DBSinglton:
         print("--- БД")
         try:
             self.engine = create_engine(DBSinglton.url_object)
+            print(self.engine.url)
             self.session = sessionmaker(bind=self.engine)()
         except Exception as e:
-            print("Ошбика подключения ", e)
+            print("Ошибка подключения ", e)
 
     def checkСonnection(self):
         """
