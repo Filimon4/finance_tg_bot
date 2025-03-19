@@ -11,5 +11,4 @@ async def inline_operations(message: Message):
   userid = message.from_user.id
   sign, summ, category = message.text.split(' ')[0:3]
   user = await UserRepository.getUserById(userid)
-  print(user)
 

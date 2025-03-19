@@ -1,4 +1,4 @@
 from .index import DB
-from .models import User
+from .models.Account import Account
 
-__all__ = ["DB", "User"]
+__all__ = ["DB", "Account"]
