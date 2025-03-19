@@ -5,6 +5,7 @@ from db import DB
 from core import MainBotTg, BotDispatcher
 from utils.loadModulesByRegex import load_modules_by_regex
 
+
 async def main():
     await MainBotTg.set_default_command()
     await BotDispatcher.start_polling(MainBotTg)

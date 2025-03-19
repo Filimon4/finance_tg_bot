@@ -1,6 +1,5 @@
-
 class OperationRepository:
 
-  @classmethod
-  async def createOperation(cls):
-    print('createOperation')
+    @classmethod
+    async def createOperation(cls):
+        print("createOperation")

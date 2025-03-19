@@ -1,5 +1,3 @@
-
-
 class OperationService:
 
     @classmethod
