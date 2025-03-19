@@ -1,4 +1,4 @@
 from .index import DB
-from .models import Account
+from .models.Account import Account
 
 __all__ = ["DB", "Account"]
