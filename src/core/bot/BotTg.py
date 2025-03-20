@@ -1,21 +1,15 @@
 import os
 from aiogram import Bot
-from aiogram.types import BotCommand
-from core.config.enums.BotTgCommands import BotTgCommands
+from core.config.consts.Commands import Commands
 
 
 class BotTg(Bot):
-    commands = [
-        BotCommand(
-            command=f"/{BotTgCommands.START.value}", description="Запуск бота"
-        ),
-    ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     async def set_default_command(self):
-        await self.set_my_commands(BotTg.commands)
+        await self.set_my_commands(Commands)
 
 
 TOKEN = os.getenv("BOT_TOKEN")

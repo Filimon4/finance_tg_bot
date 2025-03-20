@@ -2,7 +2,7 @@ from core import (
     BotDispatcher,
     BotTgCommands,
     KeyboardButtons,
-    IsReplyButtonFilter,
+    ReplyButtonFilter,
     MainBotTg,
 )
 from aiogram.filters import Command
@@ -13,8 +13,6 @@ from aiogram.types import (
     ReplyKeyboardMarkup,
     InlineKeyboardMarkup,
     InlineKeyboardButton,
-    User,
-    MaybeInaccessibleMessage,
 )
 
 
@@ -28,7 +26,7 @@ async def start(message: Message):
     await message.answer(text="start command", reply_markup=keyboard)
 
 
-@BotDispatcher.message(IsReplyButtonFilter(BotTgCommands.START))
+@BotDispatcher.message(ReplyButtonFilter(BotTgCommands.START))
 async def reply(message: Message):
     await message.answer(text="reply command")
 

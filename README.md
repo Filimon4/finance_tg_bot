@@ -7,6 +7,10 @@ python -m venv venv
 
 pip install -r requirements.txt
 ```
+# Запуск
+```py
+python ./src/index.py
+```
 
 # Архитектура проекта
 
@@ -38,4 +42,14 @@ load_modules_by_regex(os.path.dirname('src/routes'), r'routes.py')
 
 ```cmd
 black .
+```
+
+## Миграции к бд
+Генерация миграции
+```cmd
+alembic revision --autogenerate -m "Your changes"
+```
+Исполненеи мигарации
+```cmd
+alembic upgrade head
 ```

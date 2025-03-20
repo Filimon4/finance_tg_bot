@@ -1,17 +1,23 @@
-import Balance from "@components/Main/components/Balance";
-import styles from "./main.module.scss";
-import Header from "@components/Main/components/Header";
-import Toolbar from "@components/Main/components/Toolbar";
+import { MainContainer } from "@shared/components/containers/MainContainer/MainContainer";
+import Toolbar from "@widgets/Main/Toolbar/Toolbar";
+import Header from "@widgets/Main/Header/Header";
+import Balance from "@widgets/Main/Balance/Balance";
 
 const Main = () => {
   return (
-    <div className={`flex flex-col w-screen h-screen ${styles.main} text-white`}>
-      <Header />
-      <div className="flex flex-col justify-between">
-        <Balance />
-        <Toolbar />
+    <MainContainer>
+      <div className={`flex flex-col w-full h-full text-white`}>
+        <Header />
+        <div className="flex flex-col justify-between h-full">
+          <div className="h-max flex-6">
+            <Balance />
+          </div>
+          <div className="h-max flex-1/2 p-2">
+            <Toolbar />
+          </div>
+        </div>
       </div>
-    </div>
+    </MainContainer>
   );
 };
 
