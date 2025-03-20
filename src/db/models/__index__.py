@@ -13,5 +13,5 @@ __all__ = [
     "CashAccount",
     "Currency",
     "ExchangeRate",
-    "Reminder"
+    "Reminder",
 ]
