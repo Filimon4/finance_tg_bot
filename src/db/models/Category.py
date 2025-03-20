@@ -8,8 +8,9 @@ from sqlalchemy import (
     func,
 )
 
-from src.modules.finance.types import TransactionType
 from sqlalchemy.orm import relationship
+
+from modules.finance.types import TransactionType
 from ..index import Base
 
 

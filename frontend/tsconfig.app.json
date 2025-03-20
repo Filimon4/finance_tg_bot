@@ -26,9 +26,10 @@
       "@components/*": ["src/components/*"],
       "@shared/*": ["src/shared/*"],
       "@pages/*": ["src/pages/*"],
-      "@variables/*": ["src/shared/styles/variables.module.scss"],
-      "@mixins/*": ["src/shared/styles/mixins.scss"],
-      "@images/*": ["public/images/*"]
+      "@variables": ["src/shared/styles/variables.module.scss"],
+      "@mixins": ["src/shared/styles/mixins.scss"],
+      "@images/*": ["public/images/*"],
+      "@widgets/*": ["src/widgets/*"]
     }
   },
   "include": ["src"]

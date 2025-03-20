@@ -2,7 +2,7 @@ import { BsThreeDotsVertical } from "react-icons/bs";
 
 const Header = () => {
   return (
-    <div className="flex flex-row justify-between h-12 px-4">
+    <div className="flex flex-row justify-between h-12 px-4 shadow">
       <p className="self-center pl-2">ФинАсистент</p>
       <div className="flex flex-row items-center h-full">
         <BsThreeDotsVertical size={25} />

@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, Enum, TIMESTAMP, Boolean, func, ForeignKey
+
+from modules.reminders.reminders_types import DayOfWeek
 from ..index import Base
-from src.modules.reminders import DayOfWeek
 
 class Reminder(Base):
     __tablename__ = "reminder"

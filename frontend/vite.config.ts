@@ -7,7 +7,6 @@ import path from 'path';
 
 const resolvePath = (p: string) => path.resolve(__dirname, p);
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
@@ -30,6 +29,7 @@ export default defineConfig({
         '@variables': resolvePath('src/shared/styles/variables.module.scss'),
         '@mixins': resolvePath('src/shared/styles/mixins.scss'),
         '@images': resolvePath('public/images'),
+        "@widgets": resolvePath("src/widgets")
     },
 },
 })
