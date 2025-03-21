@@ -9,7 +9,7 @@ from sqlalchemy import (
     Enum,
 )
 
-from modules.finance.types import OperationType
+from systems.finance.types import OperationType
 
 from ..index import Base
 

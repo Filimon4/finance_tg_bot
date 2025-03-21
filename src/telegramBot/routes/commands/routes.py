@@ -1,4 +1,4 @@
-from core import (
+from telegramBot import (
     BotDispatcher,
     BotTgCommands,
     KeyboardButtons,

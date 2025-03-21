@@ -1,4 +1,4 @@
-from core import BotDispatcher
+from telegramBot import BotDispatcher
 from aiogram import F, Router
 from aiogram.types import Message
 from ..users.users_repository import UserRepository

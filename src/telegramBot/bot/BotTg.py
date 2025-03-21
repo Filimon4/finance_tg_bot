@@ -1,6 +1,6 @@
 import os
 from aiogram import Bot
-from core.config.consts.Commands import Commands
+from telegramBot.config.consts.Commands import Commands
 
 
 class BotTg(Bot):

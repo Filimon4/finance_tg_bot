@@ -1,4 +1,4 @@
-from core import KeyboardButtons, BotTgCommands
+from telegramBot import KeyboardButtons, BotTgCommands
 from aiogram.filters import BaseFilter
 from aiogram.types.message import Message
 

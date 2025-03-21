@@ -10,7 +10,7 @@ from sqlalchemy import (
 
 from sqlalchemy.orm import relationship
 
-from modules.finance.types import TransactionType
+from systems.finance.types import TransactionType
 from ..index import Base
 
 
