@@ -1,16 +1,30 @@
-import { ToolCategories } from "@components/Toolbar/ToolCategories/ToolCategories"
+import { ToolCategories } from "@components/Toolbar/ToolCategories/ToolCategories";
+import WhitePanelContainer from "@shared/components/containers/WhitePanelContainer/WhitePanelContainer";
+import { useToolbarCategory } from "@shared/contexts/ToolbarCategory/useToolbarCategory";
+import { ToolbarCategories } from "@shared/types/Toolbar";
+import { useCallback } from "react";
 
 const Toolbar = () => {
-  return (
-    <>
-      <div className='h-full w-full flex flex-col gap-1'>
-        <ToolCategories />
-        <div className='bg-white h-fit w-full p-6 rounded-2xl shadow-gray-500 shadow flex-1'>
-          
-        </div>
-      </div>
-    </>
-  )
-}
+  const { currentCategory } = useToolbarCategory();
 
-export default Toolbar
+  const toolbarRouter = useCallback(() => {
+    if (currentCategory == ToolbarCategories.overview) {
+      return <>overview</>;
+    } else if (currentCategory == ToolbarCategories.accounts) {
+      return <>accounts</>;
+    } else if (currentCategory == ToolbarCategories.history) {
+      return <>history</>;
+    } else if (currentCategory == ToolbarCategories.summary) {
+      return <>summary</>;
+    }
+  }, [currentCategory]);
+
+  return (
+    <div className="h-full w-full flex flex-col gap-1">
+      <ToolCategories />
+      <WhitePanelContainer>{toolbarRouter()}</WhitePanelContainer>
+    </div>
+  );
+};
+
+export default Toolbar;
