@@ -6,7 +6,7 @@ from .models import (
     Category,
     CashAccount,
     Operations,
-    Reminder
+    Reminder,
 )
 
 __all__ = [
@@ -17,5 +17,5 @@ __all__ = [
     "Operations",
     "Currency",
     "ExchangeRate",
-    "Reminder"
+    "Reminder",
 ]

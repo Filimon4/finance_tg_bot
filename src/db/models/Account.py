@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, TIMESTAMP, func
+from sqlalchemy.orm import relationship, Session
 from ..index import Base
-from sqlalchemy.orm import relationship
 
 
 class Account(Base):

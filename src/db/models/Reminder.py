@@ -3,6 +3,7 @@ from sqlalchemy import Column, Integer, Enum, TIMESTAMP, Boolean, func, ForeignK
 from systems.reminders.reminders_types import DayOfWeek
 from ..index import Base
 
+
 class Reminder(Base):
     __tablename__ = "reminder"
 
@@ -14,4 +15,3 @@ class Reminder(Base):
     next_time = Column(TIMESTAMP, nullable=True)
     is_acitve = Column(Boolean, default=False)
     created_at = Column(TIMESTAMP, default=func.now())
-
