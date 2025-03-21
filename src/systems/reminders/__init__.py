@@ -1,3 +1,3 @@
-from .reminders_types import DayOfWeek
+from .remindersTypes import DayOfWeek
 
 __all__ = ["DayOfWeek"]

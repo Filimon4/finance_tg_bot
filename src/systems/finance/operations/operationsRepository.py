@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from models.Operations import Operations
+from db.models import Operations
 
 
 class OperationsRepository:

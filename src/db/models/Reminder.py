@@ -1,6 +1,14 @@
-from sqlalchemy import Column, Integer, Enum, TIMESTAMP, Boolean, func, ForeignKey
+from sqlalchemy import (
+    Column,
+    Integer,
+    Enum,
+    TIMESTAMP,
+    Boolean,
+    func,
+    ForeignKey,
+)
 
-from systems.reminders.reminders_types import DayOfWeek
+from systems.reminders.remindersTypes import DayOfWeek
 from ..index import Base
 
 

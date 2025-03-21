@@ -1,5 +1,5 @@
 from .types import OperationType, TransactionType
-from .operations.operations_service import OperationService
+from .operations.operationsService import OperationService
 from .operations.operationsRepository import OperationRepository
 
 __all__ = [
