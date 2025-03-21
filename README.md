@@ -53,3 +53,9 @@ alembic revision --autogenerate -m "Your changes"
 ```cmd
 alembic upgrade head
 ```
+
+## Fastify Server
+Что запустить севрер для миниапы нужно запустить команду из папки ./src/serverBot
+```cmd
+uvicorn index:app --reload --port 9000
+```
