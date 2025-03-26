@@ -19,12 +19,18 @@ app.add_middleware(
 )
 
 
-@app.get("/api/test/balance")
+@app.get("/api/cash_accounts/balance")
 async def balance(req: Request):
+    print(req)
     return JSONResponse(
         content={"total": "500000", "income": "120000", "expense": "40000"}
     )
 
+@app.get("/api/cash_accounts/getAll")
+async def balance(req: Request):
+    return JSONResponse(
+        content={"total": "500000", "income": "120000", "expense": "40000"}
+    )
 
 @app.get("/api/test/operation_history")
 async def operation_history():

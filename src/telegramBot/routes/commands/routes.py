@@ -1,72 +1,22 @@
+from modules.users.usersRepository import AccountRepository
 from telegramBot import (
     BotDispatcher,
     BotTgCommands,
-    KeyboardButtons,
-    ReplyButtonFilter,
-    MainBotTg,
 )
 from aiogram.filters import Command
-from aiogram import F
 from aiogram.types import (
-    CallbackQuery,
     Message,
-    ReplyKeyboardMarkup,
-    InlineKeyboardMarkup,
-    InlineKeyboardButton,
 )
-
 
 @BotDispatcher.message(Command(commands=BotTgCommands.START.value))
 async def start(message: Message):
-    keyboard = ReplyKeyboardMarkup(
-        resize_keyboard=True,
-        keyboard=KeyboardButtons[BotTgCommands.START],
-        is_persistent=True,
-    )
-    await message.answer(text="start command", reply_markup=keyboard)
+    tg_id = message.from_user.id
+    if not tg_id: return
+    user = await AccountRepository.getOrCreateUserById(tg_id)
+    await message.answer(text="Спасибо что пользуетесь нашим приложением")
 
-
-@BotDispatcher.message(ReplyButtonFilter(BotTgCommands.START))
-async def reply(message: Message):
-    await message.answer(text="reply command")
-
-
-@BotDispatcher.message(F.text == "inline")
-async def inline_message(message: Message):
-    inlineKeyboard = InlineKeyboardMarkup(
-        inline_keyboard=[
-            [
-                InlineKeyboardButton(text="inline 1", callback_data="1"),
-                InlineKeyboardButton(text="inline 2", callback_data="2"),
-            ]
-        ]
-    )
-    await message.answer(text="inline", reply_markup=inlineKeyboard)
-
-
-@BotDispatcher.callback_query(lambda x: x.data == "1")
-async def callback_query_handler(callback_query: CallbackQuery):
-    print(
-        "Data 1: ",
-        callback_query.id,
-        callback_query.from_user.id,
-        callback_query.data,
-    )
-    await MainBotTg.answer_callback_query(
-        callback_query_id=callback_query.id,
-        text="callback_query_handler",
-    )
-
-
-@BotDispatcher.callback_query(lambda x: x.data == "2")
-async def callback_query_handler(callback_query: CallbackQuery):
-    print(
-        "Data 2: ",
-        callback_query.id,
-        callback_query.from_user.id,
-        callback_query.data,
-    )
-    await MainBotTg.answer_callback_query(
-        callback_query_id=callback_query.id,
-        text="callback_query_handler",
-    )
+# @BotDispatcher.message(F.text.regexp(r"^[+-]\s*\d+(\.\d+)?"))
+# async def inline_operations(message: Message):
+#     userid = message.from_user.id
+#     user = await UserRepository.getUserById(userid)
+#     sign, summ, category = message.text.split(" ")[0:3]

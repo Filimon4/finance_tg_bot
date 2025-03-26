@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from models.Category import Category
+
+from db.models import Category
 
 
 class CategoryRepository:

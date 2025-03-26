@@ -8,14 +8,17 @@ from sqlalchemy import (
     ForeignKey,
 )
 
-from systems.reminders.remindersTypes import DayOfWeek
+from modules.reminders.remindersTypes import DayOfWeek
+from sqlalchemy.orm import relationship
+
 from ..index import Base
 
 
 class Reminder(Base):
     __tablename__ = "reminder"
 
-    account_id = Column(Integer, ForeignKey("account.id"), nullable=False)
+    account_id = Column(Integer, ForeignKey("account.id"))
+    account = relationship("Account", back_populates="reminders")
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     day_of_week = Column(Enum(DayOfWeek), nullable=False)

@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, TIMESTAMP, func
-from sqlalchemy.orm import relationship, Session
+from sqlalchemy.orm import relationship
 from ..index import Base
 
 
@@ -8,6 +8,6 @@ class Account(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     created_at = Column(TIMESTAMP, default=func.now())
-    cash_accounts = relationship("Category", back_populates="account")
-    category_accounts = relationship("CashAccount", back_populates="account")
-    reminder_accounts = relationship("Reminder", back_populates="account")
+    categories = relationship("Category", back_populates="account")
+    cash_accounts = relationship("CashAccount", back_populates="account")
+    reminders = relationship("Reminder", back_populates="account")

@@ -10,9 +10,9 @@ from sqlalchemy import (
 
 from sqlalchemy.orm import relationship
 
-from systems.finance.types import TransactionType
-from ..index import Base
+from modules.finance.types import TransactionType
 
+from ..index import Base
 
 class Category(Base):
     __tablename__ = "category"
@@ -22,7 +22,7 @@ class Category(Base):
     base_type = Column(Enum(TransactionType), nullable=False)
     created_at = Column(TIMESTAMP, default=func.now())
 
-    account_id = Column(Integer, ForeignKey("account.id"), nullable=False)
-    account = relationship("Account", back_populates="category")
+    account_id = Column(Integer, ForeignKey("account.id"))
+    account = relationship("Account", back_populates="categories")
 
-    category_operations = relationship("Operations", back_populates="category")
+    operations = relationship("Operations", back_populates="category")

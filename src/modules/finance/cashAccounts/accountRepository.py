@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from models.Account import Account
+
+from db.models import CashAccount
 
 
 class AccountRepository:
@@ -10,7 +11,7 @@ class AccountRepository:
         Создание нового аккаунта.
         """
         try:
-            new_account = Account()
+            new_account = CashAccount()
             db.add(new_account)
             db.commit()
             db.refresh(new_account)
@@ -26,7 +27,18 @@ class AccountRepository:
         Получение аккаунта по ID.
         """
         try:
-            return db.query(Account).filter(Account.id == account_id).first()
+            return db.query(CashAccount).filter(CashAccount.id == account_id).first()
+        except SQLAlchemyError as e:
+            print(f"Ошибка при получении аккаунта: {e}")
+            return None
+        
+    @staticmethod
+    def getAllAccounts(db: Session):
+        """
+        Получение аккаунта по ID.
+        """
+        try:
+            return db.query(CashAccount).all()
         except SQLAlchemyError as e:
             print(f"Ошибка при получении аккаунта: {e}")
             return None
@@ -37,7 +49,7 @@ class AccountRepository:
         Обновление аккаунта по ID.
         """
         try:
-            account = db.query(Account).filter(Account.id == account_id).first()
+            account = db.query(CashAccount).filter(CashAccount.id == account_id).first()
             if account:
                 for key, value in kwargs.items():
                     setattr(account, key, value)
@@ -55,7 +67,7 @@ class AccountRepository:
         Удаление аккаунта по ID.
         """
         try:
-            account = db.query(Account).filter(Account.id == account_id).first()
+            account = db.query(CashAccount).filter(CashAccount.id == account_id).first()
             if account:
                 db.delete(account)
                 db.commit()
