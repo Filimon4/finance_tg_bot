@@ -1,6 +1,9 @@
+from datetime import datetime
+from sqlalchemy import extract, select
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from db.models import Operations
+from src.db.models import Operations
+from src.modules.finance.types import OperationType
 
 
 class OperationsRepository:
@@ -91,3 +94,41 @@ class OperationsRepository:
             db.rollback()
             print(f"Ошибка при удалении операции: {e}")
             return None
+        
+    @staticmethod
+    async def getOperationsStat(db: Session, cash_account_id: int):
+        current_month = datetime.now().month
+        current_year = datetime.now().year
+
+        print(current_month, current_year)
+        
+        # Получаем все нужные данные за один запрос
+        query = select(
+            Operations,
+        )
+        
+        all_operations = (await db.execute(query)).all()
+        
+        # Вычисляем статистику
+        total_income = sum(op.amount for op in all_operations if op.type == OperationType.income)
+        total_expense = sum(op.amount for op in all_operations if op.type == OperationType.expense)
+        
+        monthly_income = sum(
+            op.amount for op in all_operations 
+            if op.type == OperationType.income 
+            and op.month == current_month 
+            and op.year == current_year
+        )
+        
+        monthly_expense = sum(
+            op.amount for op in all_operations 
+            if op.type == OperationType.expense 
+            and op.month == current_month 
+            and op.year == current_year
+        )
+        
+        return {
+            "total_balance": float(total_income - total_expense),
+            "monthly_income": float(monthly_income),
+            "monthly_expense": float(monthly_expense)
+        }

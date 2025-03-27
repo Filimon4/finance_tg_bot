@@ -8,7 +8,7 @@ from sqlalchemy import (
     ForeignKey,
 )
 
-from modules.reminders.remindersTypes import DayOfWeek
+from src.modules.reminders.remindersTypes import DayOfWeek
 from sqlalchemy.orm import relationship
 
 from ..index import Base

@@ -10,9 +10,10 @@ from sqlalchemy import (
 
 from sqlalchemy.orm import relationship
 
-from modules.finance.types import TransactionType
+from src.modules.finance.types import TransactionType
 
 from ..index import Base
+
 
 class Category(Base):
     __tablename__ = "category"
