@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from models.Account import Account
+from ....db.models.Account import Account
 
 
 class AccountRepository:

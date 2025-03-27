@@ -1,9 +1,10 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from models.Operations import Operations
+from typing import Optional
+from src.db.models.Operations import Operations
 
 
-class OperationsRepository:
+class OperationRepository:
     @staticmethod
     def create(
         db: Session,
@@ -11,35 +12,30 @@ class OperationsRepository:
         to_account_id: int,
         category_id: int,
         amount: float,
-        type: str,
-        description: str = None,
-    ):
-        """
-        Создание новой операции.
-        """
+        operation_type: str,  # Переименовано для избежания конфликта с type()
+        description: Optional[str] = None,
+    ) -> Optional[Operations]:
+        """Создание новой операции"""
         try:
-            new_operation = Operations(
+            operation = Operations(
                 account_id=account_id,
                 to_account_id=to_account_id,
                 category_id=category_id,
                 amount=amount,
-                type=type,
+                type=operation_type,
                 description=description,
             )
-            db.add(new_operation)
+            db.add(operation)
             db.commit()
-            db.refresh(new_operation)
-            return new_operation
+            db.refresh(operation)
+            return operation
         except SQLAlchemyError as e:
             db.rollback()
-            print(f"Ошибка при создании операции: {e}")
-            return None
+            raise e
 
     @staticmethod
-    def get(db: Session, operation_id: int):
-        """
-        Получение операции по ID.
-        """
+    def get(db: Session, operation_id: int) -> Optional[Operations]:
+        """Получение операции по ID"""
         try:
             return (
                 db.query(Operations)
@@ -47,14 +43,13 @@ class OperationsRepository:
                 .first()
             )
         except SQLAlchemyError as e:
-            print(f"Ошибка при получении операции: {e}")
-            return None
+            raise e
 
     @staticmethod
-    def update(db: Session, operation_id: int, **kwargs):
-        """
-        Обновление операции по ID.
-        """
+    def update(
+        db: Session, operation_id: int, **kwargs
+    ) -> Optional[Operations]:
+        """Обновление операции"""
         try:
             operation = (
                 db.query(Operations)
@@ -69,14 +64,11 @@ class OperationsRepository:
             return operation
         except SQLAlchemyError as e:
             db.rollback()
-            print(f"Ошибка при обновлении операции: {e}")
-            return None
+            raise e
 
     @staticmethod
-    def delete(db: Session, operation_id: int):
-        """
-        Удаление операции по ID.
-        """
+    def delete(db: Session, operation_id: int) -> bool:
+        """Удаление операции"""
         try:
             operation = (
                 db.query(Operations)
@@ -86,8 +78,8 @@ class OperationsRepository:
             if operation:
                 db.delete(operation)
                 db.commit()
-            return operation
+                return True
+            return False
         except SQLAlchemyError as e:
             db.rollback()
-            print(f"Ошибка при удалении операции: {e}")
-            return None
+            raise e

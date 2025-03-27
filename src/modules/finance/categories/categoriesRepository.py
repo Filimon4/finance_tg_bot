@@ -1,43 +1,46 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from models.Category import Category
+from typing import Optional
+from src.db.models import Category
 
 
 class CategoryRepository:
     @staticmethod
-    def create(db: Session, name: str, base_type: str, account_id: int):
-        """
-        Создание новой категории.
-        """
+    def create(
+        db: Session, name: str, base_type: str, account_id: int
+    ) -> Optional[Category]:
+        """Создание новой категории"""
         try:
-            new_category = Category(
+            category = Category(
                 name=name, base_type=base_type, account_id=account_id
             )
-            db.add(new_category)
+            db.add(category)
             db.commit()
-            db.refresh(new_category)
-            return new_category
+            db.refresh(category)
+            return category
         except SQLAlchemyError as e:
             db.rollback()
-            print(f"Ошибка при создании категории: {e}")
-            return None
+            raise e
 
     @staticmethod
-    def get(db: Session, category_id: int):
-        """
-        Получение категории по ID.
-        """
+    def get(db: Session, category_id: int) -> Optional[Category]:
+        """Получение категории по ID"""
         try:
             return db.query(Category).filter(Category.id == category_id).first()
         except SQLAlchemyError as e:
-            print(f"Ошибка при получении категории: {e}")
-            return None
+            raise e
 
     @staticmethod
-    def update(db: Session, category_id: int, **kwargs):
-        """
-        Обновление категории по ID.
-        """
+    def get_by_name(db: Session, name: str) -> Optional[Category]:
+        """Получение категории по имени"""
+        try:
+            return db.query(Category).filter(Category.name == name).first()
+        except SQLAlchemyError as e:
+            raise e
+
+    @staticmethod
+    def update(db: Session, category_id: int, **kwargs) -> Optional[Category]:
+        """Обновление категории"""
         try:
             category = (
                 db.query(Category).filter(Category.id == category_id).first()
@@ -50,14 +53,11 @@ class CategoryRepository:
             return category
         except SQLAlchemyError as e:
             db.rollback()
-            print(f"Ошибка при обновлении категории: {e}")
-            return None
+            raise e
 
     @staticmethod
-    def delete(db: Session, category_id: int):
-        """
-        Удаление категории по ID.
-        """
+    def delete(db: Session, category_id: int) -> bool:
+        """Удаление категории"""
         try:
             category = (
                 db.query(Category).filter(Category.id == category_id).first()
@@ -65,8 +65,8 @@ class CategoryRepository:
             if category:
                 db.delete(category)
                 db.commit()
-            return category
+                return True
+            return False
         except SQLAlchemyError as e:
             db.rollback()
-            print(f"Ошибка при удалении категории: {e}")
-            return None
+            raise e
