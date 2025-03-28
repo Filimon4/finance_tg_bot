@@ -1,9 +1,9 @@
 from datetime import datetime
-from sqlalchemy import extract, select
+from sqlalchemy import and_, extract, func, select, text
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from src.db.models import Operations
-from src.modules.finance.types import OperationType
+from src.db.models.Operations import Operations
+from src.modules.finance.types import OperationType 
 
 
 class OperationsRepository:
@@ -37,6 +37,11 @@ class OperationsRepository:
             db.rollback()
             print(f"Ошибка при создании операции: {e}")
             return None
+
+    @staticmethod
+    async def get_paginate_operations(db: Session, limit: int = 100):
+        query = select(Operations).order_by(Operations.created_at.desc()).limit(limit)
+        return db.execute(query).scalars().all()
 
     @staticmethod
     def get(db: Session, operation_id: int):
@@ -97,38 +102,27 @@ class OperationsRepository:
         
     @staticmethod
     async def getOperationsStat(db: Session, cash_account_id: int):
-        current_month = datetime.now().month
-        current_year = datetime.now().year
+        now = datetime.now()
+        start_of_month = datetime(now.year, now.month, 1)
+        
+        income_query = select(func.sum(Operations.amount)).where(
+            Operations.type == OperationType.INCOME,
+            Operations.created_at >= start_of_month
+        )
+        
+        expense_query = select(func.sum(Operations.amount)).where(
+            Operations.type == OperationType.EXPENSIVE,
+            Operations.created_at >= start_of_month
+        )
 
-        print(current_month, current_year)
-        
-        # Получаем все нужные данные за один запрос
-        query = select(
-            Operations,
-        )
-        
-        all_operations = (await db.execute(query)).all()
-        
-        # Вычисляем статистику
-        total_income = sum(op.amount for op in all_operations if op.type == OperationType.income)
-        total_expense = sum(op.amount for op in all_operations if op.type == OperationType.expense)
-        
-        monthly_income = sum(
-            op.amount for op in all_operations 
-            if op.type == OperationType.income 
-            and op.month == current_month 
-            and op.year == current_year
-        )
-        
-        monthly_expense = sum(
-            op.amount for op in all_operations 
-            if op.type == OperationType.expense 
-            and op.month == current_month 
-            and op.year == current_year
-        )
-        
+        income = db.execute(income_query).scalar() or 0
+        expense = db.execute(expense_query).scalar() or 0
+
+        print('cash invome expense')
+        print(cash_account_id, income, expense)
+
         return {
-            "total_balance": float(total_income - total_expense),
-            "monthly_income": float(monthly_income),
-            "monthly_expense": float(monthly_expense)
+            "total_balance": float(income - expense), #float(total_income - total_expense),
+            "monthly_income": float(income), #float(monthly_income),
+            "monthly_expense": float(expense), #float(monthly_expense)
         }

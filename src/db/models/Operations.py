@@ -24,7 +24,7 @@ class Operations(Base):
         Integer, ForeignKey("cash_account.id"), nullable=False
     )
     to_cash_account_id = Column(
-        Integer, ForeignKey("cash_account.id"), nullable=False
+        Integer, ForeignKey("cash_account.id"), nullable=True
     )
     category_id = Column(Integer, ForeignKey("category.id"), nullable=False)
 
