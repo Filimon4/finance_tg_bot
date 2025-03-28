@@ -18,13 +18,8 @@ async def balance(tg_id: str = Query(None)):
         cashAccount = await CashAccountRepository.get(session, tg_id)
         session.close()
         balance_data = await OperationsRepository.getOperationsStat(session, cashAccount.id)
-        json_data = json.dumps(balance_data)
-        
-        print(json.loads(json_data))
-        # print(mainCashAccount.id)
-        return JSONResponse(
-            content={json.loads(json_data)}
-        )
+        print(balance_data)
+        return JSONResponse(content=balance_data)
     except Exception as e:
         print(e)
         session.close()

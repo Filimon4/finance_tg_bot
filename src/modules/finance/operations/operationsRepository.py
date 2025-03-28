@@ -11,10 +11,10 @@ class OperationsRepository:
     def create(
         db: Session,
         account_id: int,
-        to_account_id: int,
         category_id: int,
         amount: float,
         type: str,
+        to_account_id: int,
         description: str = None,
     ):
         """
