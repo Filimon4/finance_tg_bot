@@ -1,8 +1,8 @@
 import asyncio
 import os
 
+import src.db.index
 from src.telegramBot import MainBotTg, BotDispatcher
-from src.utils.loadModulesByRegex import load_modules_by_regex
 import src.telegramBot.routes.commands.routes
 
 async def main():

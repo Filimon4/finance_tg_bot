@@ -6,7 +6,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
 class DBSinglton:
     """
     Общая обёртка над базой данных
@@ -27,6 +26,7 @@ class DBSinglton:
         print("--- BD")
         try:
             self.engine = create_engine(DBSinglton.url_object)
+            print('bd URL: ', self.engine.url)
             self.session = sessionmaker(bind=self.engine)()
         except Exception as e:
             print("Ошибка подключения ", e)
