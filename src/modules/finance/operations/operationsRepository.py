@@ -5,7 +5,6 @@ from sqlalchemy.exc import SQLAlchemyError
 from src.db.models.Operations import Operations
 from src.modules.finance.types import OperationType 
 
-
 class OperationsRepository:
     @staticmethod
     def create(
@@ -13,13 +12,10 @@ class OperationsRepository:
         account_id: int,
         category_id: int,
         amount: float,
-        type: str,
-        to_account_id: int,
+        type: OperationType,
+        to_account_id: int = None,
         description: str = None,
     ):
-        """
-        Создание новой операции.
-        """
         try:
             new_operation = Operations(
                 account_id=account_id,
@@ -43,62 +39,62 @@ class OperationsRepository:
         query = select(Operations).order_by(Operations.created_at.desc()).limit(limit)
         return db.execute(query).scalars().all()
 
-    @staticmethod
-    def get(db: Session, operation_id: int):
-        """
-        Получение операции по ID.
-        """
-        try:
-            return (
-                db.query(Operations)
-                .filter(Operations.id == operation_id)
-                .first()
-            )
-        except SQLAlchemyError as e:
-            print(f"Ошибка при получении операции: {e}")
-            return None
+    # @staticmethod
+    # def get(db: Session, operation_id: int):
+    #     """
+    #     Получение операции по ID.
+    #     """
+    #     try:
+    #         return (
+    #             db.query(Operations)
+    #             .filter(Operations.id == operation_id)
+    #             .first()
+    #         )
+    #     except SQLAlchemyError as e:
+    #         print(f"Ошибка при получении операции: {e}")
+    #         return None
 
-    @staticmethod
-    def update(db: Session, operation_id: int, **kwargs):
-        """
-        Обновление операции по ID.
-        """
-        try:
-            operation = (
-                db.query(Operations)
-                .filter(Operations.id == operation_id)
-                .first()
-            )
-            if operation:
-                for key, value in kwargs.items():
-                    setattr(operation, key, value)
-                db.commit()
-                db.refresh(operation)
-            return operation
-        except SQLAlchemyError as e:
-            db.rollback()
-            print(f"Ошибка при обновлении операции: {e}")
-            return None
+    # @staticmethod
+    # def update(db: Session, operation_id: int, **kwargs):
+    #     """
+    #     Обновление операции по ID.
+    #     """
+    #     try:
+    #         operation = (
+    #             db.query(Operations)
+    #             .filter(Operations.id == operation_id)
+    #             .first()
+    #         )
+    #         if operation:
+    #             for key, value in kwargs.items():
+    #                 setattr(operation, key, value)
+    #             db.commit()
+    #             db.refresh(operation)
+    #         return operation
+    #     except SQLAlchemyError as e:
+    #         db.rollback()
+    #         print(f"Ошибка при обновлении операции: {e}")
+    #         return None
 
-    @staticmethod
-    def delete(db: Session, operation_id: int):
-        """
-        Удаление операции по ID.
-        """
-        try:
-            operation = (
-                db.query(Operations)
-                .filter(Operations.id == operation_id)
-                .first()
-            )
-            if operation:
-                db.delete(operation)
-                db.commit()
-            return operation
-        except SQLAlchemyError as e:
-            db.rollback()
-            print(f"Ошибка при удалении операции: {e}")
-            return None
+    # @staticmethod
+    # def delete(db: Session, operation_id: int):
+    #     """
+    #     Удаление операции по ID.
+    #     """
+    #     try:
+    #         operation = (
+    #             db.query(Operations)
+    #             .filter(Operations.id == operation_id)
+    #             .first()
+    #         )
+    #         if operation:
+    #             db.delete(operation)
+    #             db.commit()
+    #         return operation
+    #     except SQLAlchemyError as e:
+    #         db.rollback()
+    #         print(f"Ошибка при удалении операции: {e}")
+    #         return None
         
     @staticmethod
     async def getOperationsStat(db: Session, cash_account_id: int):

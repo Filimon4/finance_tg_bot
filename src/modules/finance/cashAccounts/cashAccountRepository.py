@@ -1,90 +1,110 @@
-from sqlalchemy import select
+from fastapi import HTTPException
+from sqlalchemy import Result, Select, func, select
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
+from src.db.models import Category, Operations
+from src.modules.finance.types import OperationType
 from src.db.models.CashAccount import CashAccount
 from src.db.models.Account import Account
 
+from pydantic import BaseModel
 
+class CashAccountCreate(BaseModel):
+    name: str
+    account_id: int
+    currency_id: int
+    
 class CashAccountRepository:
+
     @staticmethod
-    def create(db: Session):
-        """
-        Создание нового аккаунта.
-        """
+    def getOverview(session: Session, tg_id: int):
         try:
-            new_account = CashAccount()
-            db.add(new_account)
-            db.commit()
-            db.refresh(new_account)
-            return new_account
+            expenses = session.query(
+                Operations.category_id,
+                Category.name.label("category_name"),
+                func.sum(Operations.amount).label("total_amount")
+            ).join(
+                Category, Operations.category_id == Category.id
+            ).join(
+                CashAccount, Operations.cash_account_id == CashAccount.id
+            ).filter(
+                Operations.type == OperationType.EXPENSIVE,
+                CashAccount.account_id == tg_id
+            ).group_by(
+                Operations.category_id,
+                Category.name
+            ).all()
+
+            result = [
+                {
+                    "category_id": category_id,
+                    "category_name": category_name,
+                    "total_spent": float(total_amount)
+                }
+                for category_id, category_name, total_amount in expenses
+            ]
+
+            return result
         except SQLAlchemyError as e:
-            db.rollback()
             print(f"Ошибка при создании аккаунта: {e}")
             return None
 
     @staticmethod
-    async def get(db: Session, user_id: int):
-        """
-        Получение аккаунта по ID.
-        """
+    def get(session: Session, id: int):
         try:
-            query = select(CashAccount).where(CashAccount.account_id == user_id)
-            result = db.execute(query)
+            query = select(CashAccount).where(CashAccount.id == id)
+            result = session.execute(query)
             return result.scalar()
         except SQLAlchemyError as e:
             print(f"Ошибка при получении аккаунта: {e}")
             return None
 
     @staticmethod
-    def getAllAccounts(db: Session):
-        """
-        Получение аккаунта по ID.
-        """
+    def getAll(session: Session, skip: int, limit: int):
         try:
-            return db.query(CashAccount).all()
+            query: Select = select(CashAccount).offset(skip).limit(limit)
+            accounts_result: Result = session.execute(query)
+            return accounts_result.scalars().all()
         except SQLAlchemyError as e:
             print(f"Ошибка при получении аккаунта: {e}")
             return None
-
+        
     @staticmethod
-    def update(db: Session, account_id: int, **kwargs):
-        """
-        Обновление аккаунта по ID.
-        """
+    def getAll(session: Session, skip: int, limit: int):
         try:
-            account = (
-                db.query(CashAccount)
-                .filter(CashAccount.id == account_id)
-                .first()
-            )
-            if account:
-                for key, value in kwargs.items():
-                    setattr(account, key, value)
-                db.commit()
-                db.refresh(account)
-            return account
+            query: Select = select(CashAccount).offset(skip).limit(limit)
+            accounts_result: Result = session.execute(query)
+            return accounts_result.scalars().all()
         except SQLAlchemyError as e:
-            db.rollback()
-            print(f"Ошибка при обновлении аккаунта: {e}")
+            print(f"Ошибка при получении аккаунта: {e}")
             return None
-
+        
     @staticmethod
-    def delete(db: Session, account_id: int):
-        """
-        Удаление аккаунта по ID.
-        """
+    def getCashAccountOverview(session: Session, id: int):
         try:
-            account = (
-                db.query(CashAccount)
-                .filter(CashAccount.id == account_id)
-                .first()
+            account = session.query(CashAccount).filter(CashAccount.id == id).first()
+            if not account:
+                raise 'Нету такого счёта'
+            
+            total_income = (
+                session.query(func.sum(Operations.amount))
+                .filter(Operations.cash_account_id == id, Operations.type == OperationType.INCOME)
+                .scalar() or 0
             )
-            if account:
-                db.delete(account)
-                db.commit()
-            return account
+            total_expense = (
+                session.query(func.sum(Operations.amount))
+                .filter(Operations.cash_account_id == id, Operations.type == OperationType.EXPENSIVE)
+                .scalar() or 0
+            )
+            return {
+                account: account,
+                total_income: total_income,
+                total_expense: total_expense
+            }
         except SQLAlchemyError as e:
-            db.rollback()
-            print(f"Ошибка при удалении аккаунта: {e}")
+            print(f"Ошибка при получении аккаунта: {e}")
             return None
+        
+    
+

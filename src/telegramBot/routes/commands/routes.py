@@ -1,5 +1,5 @@
-from modules.users.usersRepository import AccountRepository
-from telegramBot import (
+from src.modules.accounts.accountsRepository import AccountRepository
+from src.telegramBot import (
     BotDispatcher,
     BotTgCommands,
 )
@@ -12,9 +12,11 @@ from aiogram.types import (
 @BotDispatcher.message(Command(commands=BotTgCommands.START.value))
 async def start(message: Message):
     tg_id = message.from_user.id
+    print(tg_id)
     if not tg_id:
         return
     user = await AccountRepository.getOrCreateUserById(tg_id)
+    print(user)
     await message.answer(text="Спасибо что пользуетесь нашим приложением")
 
 

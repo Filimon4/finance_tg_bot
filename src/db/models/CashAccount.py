@@ -17,10 +17,11 @@ class CashAccount(Base):
         "Operations",
         foreign_keys="[Operations.cash_account_id]",
         back_populates="account",
+        cascade=True
     )
-
     incoming_operations = relationship(
         "Operations",
         foreign_keys="[Operations.to_cash_account_id]",
         back_populates="to_account",
+        cascade=True
     )

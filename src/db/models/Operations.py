@@ -33,11 +33,13 @@ class Operations(Base):
         "CashAccount",
         foreign_keys=[cash_account_id],
         back_populates="outgoing_operations",
+        cascade=True
     )
     to_account = relationship(
         "CashAccount",
         foreign_keys=[to_cash_account_id],
         back_populates="incoming_operations",
+        cascade=True
     )
     category = relationship("Category", back_populates="operations")
 

@@ -1,41 +1,12 @@
-import json
 from fastapi import Query, Request
 from fastapi.responses import JSONResponse
-
-from src.modules.accounts.accountsRepository import AccountRepository
-from src.modules.finance.operations.operationsRepository import OperationsRepository
+from src.db.index import DB
 from src.modules.finance.cashAccounts.cashAccountRepository import CashAccountRepository
-from src.db import DB
+from src.modules.finance.operations.operationsRepository import OperationsRepository
 
-from .index import app
+from ..index import app
 
-@app.get("/api/account/balance")
-async def balance(tg_id: str = Query(None)):
-    session = DB.getSession()
-    try:
-        print(tg_id)
-        session.begin()
-        cashAccount = await CashAccountRepository.get(session, tg_id)
-        session.close()
-        balance_data = await OperationsRepository.getOperationsStat(session, cashAccount.id)
-        print(balance_data)
-        return JSONResponse(content=balance_data)
-    except Exception as e:
-        print(e)
-        session.close()
-        return JSONResponse(
-            status_code=500,
-            content={"success": False, "error": str(e)}
-        )
-
-
-@app.get("/api/cash_accounts/overview")
-async def balance(req: Request):
-    return JSONResponse(
-        content={"total": "500000", "income": "120000", "expense": "40000"}
-    )
-
-@app.get("/api/operations/get")
+@app.get("/api/operations/get_all", tags=['Operations'])
 async def balance(tg_id: str = Query(None)):
     session = DB.getSession()
     try:
@@ -67,3 +38,19 @@ async def balance(tg_id: str = Query(None)):
             status_code=500,
             content={"success": False, "error": str(e)}
         )
+    
+@app.get("/api/operations/get_operation", tags=['Operations'])
+async def createOperation(tg_id: str = Query(None), oper_id = Query(None)):
+    pass
+    
+@app.post("/api/operations/create", tags=['Operations'])
+async def createOperation(tg_id: str = Query(None)):
+    pass
+
+@app.delete("/api/operations/create", tags=['Operations'])
+async def deleteOperation(tg_id: str = Query(None)):
+    pass
+
+@app.patch("/api/operations/update_operation", tags=['Operations'])
+async def updateOperation(tg_id: str = Query(None)):
+    pass

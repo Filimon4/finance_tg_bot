@@ -15,5 +15,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from .routes import *
-
+from .routes.operations import *
+from .routes.notifies import *
+from .routes.categories import *
+from .routes.cashAccount import *
+from .routes.account import *
