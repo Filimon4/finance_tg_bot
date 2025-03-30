@@ -15,12 +15,13 @@ from src.modules.finance.types import TransactionType
 from ..index import Base
 
 
+
 class Category(Base):
     __tablename__ = "category"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(VARCHAR(255), nullable=False, unique=True)
-    base_type = Column(Enum(TransactionType), nullable=False)
+    base_type = Column(Enum(TransactionType), nullable=True)
     created_at = Column(TIMESTAMP, default=func.now())
 
     account_id = Column(Integer, ForeignKey("account.id"))

@@ -1,73 +1,140 @@
+from fastapi import HTTPException
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
-from db.models import Category
+from src.modules.finance.types import OperationType, TransactionType
+from src.db.models.Operations import Operations
+from src.db.models import Category
 
+from pydantic import BaseModel
+
+class CategoryCreateDTO(BaseModel):
+    name: str
+    base_type: TransactionType
+    account_id: int
+
+class CategoryUpdateDTO(BaseModel):
+    category_id: int
+    name: str
+    base_type: TransactionType
+    account_id: int
 
 class CategoryRepository:
     @staticmethod
-    def create(db: Session, name: str, base_type: str, account_id: int):
+    def create(session: Session, data: CategoryCreateDTO):
         """
         Создание новой категории.
         """
         try:
             new_category = Category(
-                name=name, base_type=base_type, account_id=account_id
+                name=data.name, base_type=data.base_type or None, account_id=data.account_id
             )
-            db.add(new_category)
-            db.commit()
-            db.refresh(new_category)
+            session.add(new_category)
+            session.commit()
             return new_category
+        except Exception as e:
+            print(e)
+            return None 
         except SQLAlchemyError as e:
-            db.rollback()
-            print(f"Ошибка при создании категории: {e}")
+            print(e)
             return None
 
     @staticmethod
-    def get(db: Session, category_id: int):
-        """
-        Получение категории по ID.
-        """
+    def get(session: Session, tg_id: int, category_id: int):
         try:
-            return db.query(Category).filter(Category.id == category_id).first()
+            return session.query(Category).filter(Category.id == category_id, Category.account_id == tg_id).first()
+        except SQLAlchemyError as e:
+            print(f"Ошибка при получении категории: {e}")
+            return None
+        
+    @staticmethod
+    def getAll(session: Session, tg_id: int):
+        try:
+            return session.query(Category).filter(Category.account_id == tg_id).all()
         except SQLAlchemyError as e:
             print(f"Ошибка при получении категории: {e}")
             return None
 
     @staticmethod
-    def update(db: Session, category_id: int, **kwargs):
+    def update(session: Session, data: CategoryUpdateDTO):
         """
         Обновление категории по ID.
         """
         try:
-            category = (
-                db.query(Category).filter(Category.id == category_id).first()
-            )
-            if category:
-                for key, value in kwargs.items():
-                    setattr(category, key, value)
-                db.commit()
-                db.refresh(category)
+            category = session.query(Category).filter(
+                Category.id == data.category_id,
+                Category.account_id == data.account_id
+            ).first()
+
+            if not category:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Category not found or access denied"
+                )
+
+            # 2. Обновляем данные
+            if data.name is not None:
+                category.name = data.name
+            if data.base_type is not None:
+                category.base_type = data.base_type
+             
+            # 3. Сохраняем изменения
+            session.commit()
+
             return category
+        except HTTPException:
+            raise 
         except SQLAlchemyError as e:
-            db.rollback()
-            print(f"Ошибка при обновлении категории: {e}")
-            return None
+            print(f"Database error: {str(e)}")
+            raise HTTPException(
+                status_code=500,
+                detail="Database error occurred"
+            )
+        except Exception as e:
+            print(f"Unexpected error: {str(e)}")
+            raise HTTPException(
+                status_code=500,
+                detail="Internal server error"
+            )
 
     @staticmethod
-    def delete(db: Session, category_id: int):
-        """
-        Удаление категории по ID.
-        """
+    def delete(session: Session, category_id: int):
         try:
-            category = (
-                db.query(Category).filter(Category.id == category_id).first()
-            )
-            if category:
-                db.delete(category)
-                db.commit()
-            return category
-        except SQLAlchemyError as e:
-            db.rollback()
-            print(f"Ошибка при удалении категории: {e}")
+            category = session.query(Category).filter(Category.id == category_id).first()
+            if not category: raise Exception('There is not category')
+            session.delete(category)
+            session.commit()
+        except Exception as e:
             return None
+        except SQLAlchemyError as e:
+            return None
+        
+    @staticmethod
+    def getCategoryOverview(session: Session, tg_id: int, category_id: int):
+        try:
+            category = CategoryRepository.get(session, tg_id, category_id)
+            if not category:
+                raise Exception("Категория не найдена")
+            
+            total_income = session.query(
+                func.coalesce(func.sum(Operations.amount), 0)
+            ).filter(
+                Operations.category_id == category.id, Operations.type == OperationType.INCOME
+            ).scalar() or 0
+
+            total_expenses = session.query(
+                func.coalesce(func.sum(Operations.amount), 0)
+            ).filter(
+                Operations.category_id == category.id, Operations.type == OperationType.EXPENSIVE
+            ).scalar() or 0
+
+            return {
+                'total_income': float(total_income),
+                'total_expenses': float(total_expenses),
+                'balance': float(float(total_income) - float(total_expenses))
+            }
+        except SQLAlchemyError as e:
+            print(e)
+            return None
+

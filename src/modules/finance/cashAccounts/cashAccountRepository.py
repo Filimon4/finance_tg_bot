@@ -90,7 +90,8 @@ class CashAccountRepository:
             return {
                 'account': account,
                 'total_income': total_income,
-                'total_expenses': total_expenses
+                'total_expenses': total_expenses,
+                'balance': float(float(total_income) - float(total_expenses))
             }
         except SQLAlchemyError as e:
             print(f"Ошибка при получении аккаунта: {e}")
