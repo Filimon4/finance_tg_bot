@@ -18,7 +18,7 @@ class CashAccountCreate(BaseModel):
 class CashAccountRepository:
 
     @staticmethod
-    def getOverview(session: Session, tg_id: int):
+    def getExpensesOverview(session: Session, tg_id: int):
         try:
             expenses = session.query(
                 Operations.category_id,
@@ -55,21 +55,11 @@ class CashAccountRepository:
         try:
             query = select(CashAccount).where(CashAccount.id == id)
             result = session.execute(query)
-            return result.scalar()
+            return result.scalars().first()
         except SQLAlchemyError as e:
             print(f"Ошибка при получении аккаунта: {e}")
             return None
 
-    @staticmethod
-    def getAll(session: Session, skip: int, limit: int):
-        try:
-            query: Select = select(CashAccount).offset(skip).limit(limit)
-            accounts_result: Result = session.execute(query)
-            return accounts_result.scalars().all()
-        except SQLAlchemyError as e:
-            print(f"Ошибка при получении аккаунта: {e}")
-            return None
-        
     @staticmethod
     def getAll(session: Session, skip: int, limit: int):
         try:
@@ -92,15 +82,15 @@ class CashAccountRepository:
                 .filter(Operations.cash_account_id == id, Operations.type == OperationType.INCOME)
                 .scalar() or 0
             )
-            total_expense = (
+            total_expenses = (
                 session.query(func.sum(Operations.amount))
                 .filter(Operations.cash_account_id == id, Operations.type == OperationType.EXPENSIVE)
                 .scalar() or 0
             )
             return {
-                account: account,
-                total_income: total_income,
-                total_expense: total_expense
+                'account': account,
+                'total_income': total_income,
+                'total_expenses': total_expenses
             }
         except SQLAlchemyError as e:
             print(f"Ошибка при получении аккаунта: {e}")

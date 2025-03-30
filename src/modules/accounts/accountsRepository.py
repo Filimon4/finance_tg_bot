@@ -1,5 +1,8 @@
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session
+from src.modules.finance.cashAccounts.cashAccountRepository import CashAccountRepository
+from src.db.models.Operations import Operations
+from src.db.models.CashAccount import CashAccount
 from src.db.models.Account import Account
 
 
@@ -54,3 +57,28 @@ class AccountRepository:
         except Exception as e:
             print(e)
             return False
+        
+    @staticmethod
+    async def getAccountOverview(session: Session, tg_id: int):
+        try:
+            allCashAccount = session.query(CashAccount).filter(CashAccount.account_id == tg_id).all()
+            
+            account_overview = {
+                "total_income": float(0),
+                "total_expenses": float(0)
+            }
+
+            for cashAccount in allCashAccount:
+                cashAccountBalance = CashAccountRepository.getCashAccountOverview(session, cashAccount.id)
+                if not cashAccountBalance: continue
+                account_overview["total_income"] += float(cashAccountBalance["total_income"])
+                account_overview["total_expenses"] += float(cashAccountBalance["total_expenses"])
+
+            return {
+                "balance": float(account_overview["total_income"] - account_overview["total_expenses"]),
+                "total_income": account_overview["total_income"],
+                "total_expenses": account_overview["total_expenses"]
+            }
+        except Exception as e:
+            print(e)
+            return None

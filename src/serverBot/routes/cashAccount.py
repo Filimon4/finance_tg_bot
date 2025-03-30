@@ -72,7 +72,7 @@ async def getCashAccount(id: int):
 async def getCashAccountsOverview(tg_id: int = Query(None)):
     try:
       with DB.getSession() as session:
-        total_accounts = CashAccountRepository.getOverview(session, tg_id)
+        total_accounts = CashAccountRepository.getExpensesOverview(session, tg_id)
         return JSONResponse(
             status_code=200,
             content={"total_accounts": total_accounts},

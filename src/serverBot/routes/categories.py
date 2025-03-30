@@ -10,7 +10,7 @@ from ..index import app
 async def balance(tg_id: str = Query(None)):
     session = DB.getSession()
     try:
-        overview = CashAccountRepository.getOverview(session, tg_id)
+        overview = CashAccountRepository.getExpensesOverview(session, tg_id)
 
         return JSONResponse(
             status_code=200,
