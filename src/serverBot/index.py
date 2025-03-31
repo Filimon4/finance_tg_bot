@@ -20,3 +20,7 @@ from .routes.notifies import *
 from .routes.categories import *
 from .routes.cashAccount import *
 from .routes.account import *
+
+@app.get('/health')
+def getApiHealth():
+  return "Ok"

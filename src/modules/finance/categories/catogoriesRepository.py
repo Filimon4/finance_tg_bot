@@ -58,9 +58,6 @@ class CategoryRepository:
 
     @staticmethod
     def update(session: Session, data: CategoryUpdateDTO):
-        """
-        Обновление категории по ID.
-        """
         try:
             category = session.query(Category).filter(
                 Category.id == data.category_id,
@@ -73,13 +70,11 @@ class CategoryRepository:
                     detail="Category not found or access denied"
                 )
 
-            # 2. Обновляем данные
-            if data.name is not None:
-                category.name = data.name
-            if data.base_type is not None:
-                category.base_type = data.base_type
+            if hasattr(data, 'name'):
+                category.name = data.name if data.name is not None else None
+            if hasattr(data, 'base_type'):
+                category.base_type = data.base_type if data.base_type is not None else None
              
-            # 3. Сохраняем изменения
             session.commit()
 
             return category
