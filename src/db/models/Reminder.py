@@ -1,3 +1,4 @@
+from pydantic import BaseModel
 from sqlalchemy import (
     Column,
     Integer,
@@ -10,9 +11,21 @@ from sqlalchemy import (
 
 from src.modules.reminders.remindersTypes import DayOfWeek
 from sqlalchemy.orm import relationship
+from datetime import time
 
 from ..index import Base
 
+class ReminderCreateDTO(BaseModel):
+    account_id: int
+    day_of_week: DayOfWeek
+    time: str
+    is_acitve: bool
+
+class ReminderUpdateDTO(BaseModel):
+    id: int
+    day_of_week: DayOfWeek | None
+    time: str | None
+    is_acitve: bool | None
 
 class Reminder(Base):
     __tablename__ = "reminder"

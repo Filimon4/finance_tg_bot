@@ -21,9 +21,10 @@ class Operations(Base):
     cash_account_id = Column(Integer, ForeignKey("cash_account.id"), nullable=False)
     to_cash_account_id = Column(Integer, ForeignKey("cash_account.id"), nullable=True)
     category_id = Column(Integer, ForeignKey("category.id"), nullable=False)
+    account_id = Column(Integer, ForeignKey("account.id"), nullable=True)
 
     # Relationships
-    account = relationship(
+    cash_account = relationship(
         "CashAccount",
         foreign_keys=[cash_account_id],
         back_populates="outgoing_operations",
@@ -34,6 +35,7 @@ class Operations(Base):
         back_populates="incoming_operations",
     )
     category = relationship("Category", back_populates="operations")
+    account = relationship("Account", back_populates="operations")  # This one stays as 'account'
 
     amount = Column(Numeric(15, 2), nullable=False)
     description = Column(Text, nullable=True)

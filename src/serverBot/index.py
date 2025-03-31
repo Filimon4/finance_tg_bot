@@ -16,7 +16,7 @@ app.add_middleware(
 )
 
 from .routes.operations import *
-from .routes.notifies import *
+from .routes.reminders import *
 from .routes.categories import *
 from .routes.cashAccount import *
 from .routes.account import *

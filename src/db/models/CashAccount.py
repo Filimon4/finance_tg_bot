@@ -16,7 +16,7 @@ class CashAccount(Base):
     outgoing_operations = relationship(
         "Operations",
         foreign_keys="[Operations.cash_account_id]",
-        back_populates="account",
+        back_populates="cash_account",  # Changed from 'account' to 'cash_account'
     )
     incoming_operations = relationship(
         "Operations",

@@ -8,6 +8,7 @@ from src.db.models.Operations import Operations
 from src.modules.finance.types import OperationType 
 
 class OperationCreateDTO(BaseModel):
+    tg_id: int
     cash_account_id: int
     to_cash_account_id: int | None
     category_id: int
@@ -28,7 +29,9 @@ class OperationsRepository:
     @staticmethod
     def create( session: Session, data: OperationCreateDTO):
         try:
+            print(data)
             operation = Operations(
+                account_id = data.tg_id,
                 cash_account_id = data.cash_account_id,
                 to_cash_account_id = data.to_cash_account_id,
                 category_id = data.category_id,
@@ -36,6 +39,7 @@ class OperationsRepository:
                 description = data.description,
                 type = data.type
             )
+            print(operation)
             session.add(operation)
             session.commit()
             return operation

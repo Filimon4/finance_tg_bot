@@ -61,8 +61,9 @@ async def createOperation(data: OperationCreateDTO):
         with DB.getSession() as session:
             if data.to_cash_account_id == data.cash_account_id: 
                 raise Exception('to_cash_account_id equls cash_account_id')
+            
             operation = OperationsRepository.create(session, data)
-
+            print(operation)
             operation_data = {
                 'id': operation.id,
                 'cash_account_id': operation.cash_account_id, 
@@ -72,7 +73,6 @@ async def createOperation(data: OperationCreateDTO):
                 'description': operation.description,
                 'type': operation.type.name
             }
-
             return JSONResponse(
                 status_code=200,
                 content={"operation": operation_data, "success": True},

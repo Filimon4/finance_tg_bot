@@ -11,3 +11,4 @@ class Account(Base):
     categories = relationship("Category", back_populates="account")
     cash_accounts = relationship("CashAccount", back_populates="account")
     reminders = relationship("Reminder", back_populates="account")
+    operations = relationship("Operations", back_populates="account")

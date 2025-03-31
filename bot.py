@@ -12,5 +12,4 @@ async def main():
 
 if __name__ == "__main__":
     print("Запуск бота")
-    # load_modules_by_regex(os.path.dirname("./src/telegramBot"), r"routes.py")
     asyncio.run(main())
