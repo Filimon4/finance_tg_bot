@@ -4,7 +4,7 @@ from sqlalchemy import create_engine, URL
 from typing import ClassVar, Type
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(dotenv_path='.env')
 
 class DBSinglton:
     """
