@@ -39,7 +39,7 @@ async def getCategoryOperations(cash_account_id: int = Query(None), page: int = 
             content={"success": False, "error": str(e)}
         )
     
-@app.get("/api/operations/operations", tags=['Operations'])
+@app.get("/api/operations", tags=['Operations'])
 async def getOperations(tg_id: int = Query(None), page: int = Query(1), limit: int = Query(100)):
     try:
         with DB.get_session() as session:
