@@ -4,7 +4,8 @@ ENV DB_HOST=212.113.123.161 \
     DB_USERNAME=gen_user \
     DB_PASSWORD=efim_admin \
     DB_PORT=5432 \
-    DB_NAME=default_db
+    DB_NAME=default_db \
+    APP_HOST=217.25.89.163
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
