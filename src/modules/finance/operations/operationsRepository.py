@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import and_, extract, func, select, text
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
+from src.db.models.Account import Account
 from src.modules.finance.cashAccounts.cashAccountRepository import CashAccountRepository
 from src.db.models.Operations import Operations
 from src.modules.finance.types import OperationType 
@@ -73,8 +74,23 @@ class OperationsRepository:
             raise Exception(e)
         
     @staticmethod
-    def getOperations(session: Session, cash_account_id: int):
-        pass
+    def getOperations(session: Session, tg_id: int, page: int = 1, limit: int = 100):
+        try:
+            page = max(1, page)
+            offset = (page - 1) * limit
+            
+            operations = (
+                session.query(Operations)
+                .join(Account, Operations.account_id == Account.id)
+                .order_by(Operations.created_at.desc())
+                .offset(offset)
+                .limit(limit)
+                .all()
+            )
+            return operations
+            
+        except Exception as e:
+            raise Exception(f"Failed to get operations: {str(e)}")
 
     @staticmethod
     def update(session: Session, data: OperationUpdateDTO):

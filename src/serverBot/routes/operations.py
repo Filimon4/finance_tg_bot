@@ -43,10 +43,26 @@ async def getCategoryOperations(cash_account_id: int = Query(None), page: int = 
 async def getOperations(tg_id: int = Query(None), page: int = Query(1), limit: int = Query(100)):
     try:
         with DB.get_session() as session:
+            operations = OperationsRepository.getOperations(session, tg_id, page, limit)
             
+            operations_json = []
+            for operation in operations:
+                operation_dict = {
+                    "id": operation.id,
+                    "cash_account_id": operation.cash_account_id,
+                    "to_cash_account_id": operation.to_cash_account_id,
+                    "category_id": operation.category_id,
+                    "account_id": operation.account_id,
+                    "amount": float(operation.amount),
+                    "description": operation.description,
+                    "type": operation.type.name if operation.type else None,
+                    "created_at": str(operation.created_at)
+                }
+                operations_json.append(operation_dict)
+
             return JSONResponse(
                 status_code=200,
-                content={"success": True}
+                content={"success": True, "operations": operations_json}
             )
     except Exception as e:
         return JSONResponse(
