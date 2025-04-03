@@ -10,7 +10,7 @@ from ..index import app
 @app.get("/api/account/balance", tags=['Account'])
 def balance(tg_id: str = Query(None)):
     try:
-        with DB.getSession() as session:
+        with DB.get_session() as session:
             accountBalanceOverview = AccountRepository.getAccountOverview(session, tg_id)
             print(accountBalanceOverview)
             

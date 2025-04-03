@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 @app.get("/api/cash_accounts/get_all", tags=['Cash Account'], description='Получить список всех кассовых счетов')
 async def getCashAccounts(skip: int = 0, limit: int = 100):
     try:
-        with DB.getSession() as session: #type: Session
+        with DB.get_session() as session: #type: Session
             accounts = CashAccountRepository.getAll(session, skip, limit)
             account_data = [
                 {
@@ -40,7 +40,7 @@ async def getCashAccounts(skip: int = 0, limit: int = 100):
 @app.get("/api/cash_accounts/get_one", tags=['Cash Account'], description='Получить кассовый счет по ID')
 async def getCashAccount(id: int):
     try:
-        with DB.getSession() as session:
+        with DB.get_session() as session:
             account = CashAccountRepository.get(session, id)
             if not account:
                 raise HTTPException(status_code=404, detail="Cash account not found")
@@ -71,7 +71,7 @@ async def getCashAccount(id: int):
 @app.get("/api/cash_accounts/overview", tags=['Cash Account'], description='Получить сводку по всем счетам')
 async def getCashAccountsOverview(tg_id: int = Query(None)):
     try:
-      with DB.getSession() as session:
+      with DB.get_session() as session:
         total_accounts = CashAccountRepository.getExpensesOverview(session, tg_id)
         return JSONResponse(
             status_code=200,
@@ -88,7 +88,7 @@ async def getCashAccountsOverview(tg_id: int = Query(None)):
 @app.get("/api/cash_accounts/{id}/overview", tags=['Cash Account'], description='Получить сводку по конкретному счету')
 async def getSingleCashAccountOverview(id: int):
     try:
-      with DB.getSession() as session:
+      with DB.get_session() as session:
         accountData = CashAccountRepository.getCashAccountOverview(session, id)
         if not accountData:
             raise HTTPException(status_code=404, detail="Cash account not found")
@@ -114,7 +114,7 @@ async def getSingleCashAccountOverview(id: int):
 @app.post("/api/cash_accounts/create", tags=['Cash Account'], description='Создать новый кассовый счет')
 async def creatCashAccount(account_data: CashAccountCreate):
     try:
-      with DB.getSession() as session:
+      with DB.get_session() as session:
         new_account = CashAccount(
           name=account_data.name,
           account_id=account_data.account_id,
@@ -134,7 +134,7 @@ async def creatCashAccount(account_data: CashAccountCreate):
 @app.delete("/api/cash_accounts/delete/{id}", tags=['Cash Account'], description='Удалить кассовый счет')
 async def delete_cash_account(id: int):
     try:
-      with DB.getSession() as session:
+      with DB.get_session() as session:
         account = session.query(CashAccount).filter(CashAccount.id == id).first()
         if not account:
             raise HTTPException(status_code=404, detail="Cash account not found")

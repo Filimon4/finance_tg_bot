@@ -11,7 +11,7 @@ from ..index import app
 @app.get("/api/operations/cash_account_operations", tags=['Operations'])
 async def getCategoryOperations(cash_account_id: int = Query(None), page: int = Query(1), limit: int = Query(100)):
     try:
-        with DB.getSession() as session:
+        with DB.get_session() as session:
             operations = OperationsRepository.getOperationsByCashAccount(session, cash_account_id, page, limit)
             operations_data = [{
                 'id': op.id,
@@ -42,7 +42,7 @@ async def getCategoryOperations(cash_account_id: int = Query(None), page: int = 
 @app.get("/api/operations/operations", tags=['Operations'])
 async def getOperations(tg_id: int = Query(None), page: int = Query(1), limit: int = Query(100)):
     try:
-        with DB.getSession() as session:
+        with DB.get_session() as session:
             
             return JSONResponse(
                 status_code=200,
@@ -57,7 +57,7 @@ async def getOperations(tg_id: int = Query(None), page: int = Query(1), limit: i
 @app.post("/api/operations", tags=['Operations'])
 async def createOperation(data: OperationCreateDTO):
     try:
-        with DB.getSession() as session:
+        with DB.get_session() as session:
             if data.to_cash_account_id == data.cash_account_id: 
                 raise Exception('to_cash_account_id equls cash_account_id')
             
@@ -85,7 +85,7 @@ async def createOperation(data: OperationCreateDTO):
 @app.delete("/api/operations", tags=['Operations'])
 async def deleteOperation(oper_id: int = Query(None)):
     try:
-        with DB.getSession() as session:
+        with DB.get_session() as session:
             deleted = OperationsRepository.delete(session, oper_id)
             if not deleted: raise Exception('Failed to delete')
             
@@ -102,7 +102,7 @@ async def deleteOperation(oper_id: int = Query(None)):
 @app.patch("/api/operations", tags=['Operations'])
 async def updateOperation(data: OperationUpdateDTO):
     try:
-        with DB.getSession() as session:
+        with DB.get_session() as session:
             updated_operation = OperationsRepository.update(session, data)
             if not updated_operation: raise Exception('Failed to update')
 

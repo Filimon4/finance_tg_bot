@@ -10,7 +10,7 @@ from ..index import app
 @app.get("/api/categories/overview", tags=['Categories'])
 async def getOverview(tg_id: str = Query(None)):
     try:
-        with DB.getSession() as session:
+        with DB.get_session() as session:
             allCategories = CategoryRepository.getAll(session, tg_id)
             
             total_overview = {
@@ -41,7 +41,7 @@ async def getOverview(tg_id: str = Query(None)):
 @app.get("/api/categories/{id}/overview", tags=['Categories'])
 async def getCategoryOverview(id: int, tg_id: str = Query(None)):
     try:
-        with DB.getSession() as session:
+        with DB.get_session() as session:
             categoryOverview = CategoryRepository.getCategoryOverview(session, tg_id, id)
             print(categoryOverview)
 
@@ -59,7 +59,7 @@ async def getCategoryOverview(id: int, tg_id: str = Query(None)):
 @app.post("/api/categories/create", tags=['Categories'])
 async def createCategory(data: CategoryCreateDTO):
     try:
-        with DB.getSession() as session:
+        with DB.get_session() as session:
             category = CategoryRepository.create(session, data)
             category_data = {
                 'name': category.name,
@@ -81,7 +81,7 @@ async def createCategory(data: CategoryCreateDTO):
 @app.patch("/api/categories/update", tags=['Categories'])
 async def updateCategory(data: CategoryUpdateDTO):
     try:
-        with DB.getSession() as session:
+        with DB.get_session() as session:
             updatedCategory = CategoryRepository.update(session, data)
             print(updatedCategory.base_type.name)
             categoryData = {
@@ -105,7 +105,7 @@ async def updateCategory(data: CategoryUpdateDTO):
 @app.delete("/api/categories/delete", tags=['Categories'])
 async def delete(cat_id: str = Query(None)):
     try:
-        with DB.getSession() as session:
+        with DB.get_session() as session:
             deleted = CategoryRepository.delete(session, cat_id)
             if not deleted:
                 raise Exception(f'Failed to delete {cat_id}')

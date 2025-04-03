@@ -10,7 +10,7 @@ from ..index import app
 @app.get('/api/notifies/all', tags=['Notifies'])
 def getAllNotifies():
   try:
-    with DB.getSession() as session:
+    with DB.get_session() as session:
       reminders = RemindersRepository.getAll(session)
       reminders_data = [
         {
@@ -36,7 +36,7 @@ def getAllNotifies():
 @app.post('/api/notifies/create', tags=['Notifies'])
 def createNotify(data: ReminderCreateDTO):
   try:
-    with DB.getSession() as session:
+    with DB.get_session() as session:
       newReminder = RemindersRepository.create(session, data)
       reminderData = {
         'id': newReminder.id,
@@ -60,7 +60,7 @@ def createNotify(data: ReminderCreateDTO):
 @app.patch('/api/notifies/update', tags=['Notifies'])
 def updateNotify(data: ReminderUpdateDTO):
   try:
-    with DB.getSession() as session:
+    with DB.get_session() as session:
       reminders = RemindersRepository.update(session, data)
       print(reminders)
       if not reminders: raise Exception('Failed to update')
@@ -86,7 +86,7 @@ def updateNotify(data: ReminderUpdateDTO):
 @app.delete('/api/notifies/delete', tags=['Notifies'])
 def deleteNotify(id: int = Query(None)):
   try:
-    with DB.getSession() as session:
+    with DB.get_session() as session:
       deleted = RemindersRepository.delete(session, id)
       if not deleted: raise Exception('Failed to delete')
       return JSONResponse(
