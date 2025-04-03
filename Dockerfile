@@ -21,6 +21,6 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-EXPOSE 9000
+EXPOSE 433
 
 CMD ["python", "./mini_app_server.py"]
