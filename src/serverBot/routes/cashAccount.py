@@ -11,10 +11,10 @@ from ..index import app
 from sqlalchemy.orm import Session
 
 @app.get("/api/cash_accounts/get_all", tags=['Cash Account'], description='Получить список всех кассовых счетов')
-async def getCashAccounts(skip: int = 0, limit: int = 100):
+async def getCashAccounts(tg_id: int = Query(None), page: int = 0, limit: int = 100):
     try:
-        with DB.get_session() as session: #type: Session
-            accounts = CashAccountRepository.getAll(session, skip, limit)
+        with DB.get_session() as session:
+            accounts = CashAccountRepository.getAll(session, tg_id, page, limit)
             account_data = [
                 {
                     "id": acc.id,
@@ -72,10 +72,22 @@ async def getCashAccount(id: int):
 async def getCashAccountsOverview(tg_id: int = Query(None)):
     try:
       with DB.get_session() as session:
-        total_accounts = CashAccountRepository.getExpensesOverview(session, tg_id)
+        accounts = CashAccountRepository.getAll(session, tg_id)
+        accountsOverview = []
+
+        for acc in accounts:
+            accountData = CashAccountRepository.getCashAccountOverview(session, acc.id)
+            accountsOverview.append({
+                "account_id": accountData['account'].id,
+                "account_name": accountData['account'].name,
+                "total_income": float(accountData['total_income']),
+                "total_expenses": float(accountData['total_expenses']),
+                "current_balance": float(accountData['total_income']) - float(accountData['total_expenses'])
+            })
+
         return JSONResponse(
             status_code=200,
-            content={"total_accounts": total_accounts},
+            content={"accounts_overview": accountsOverview},
         )
     except Exception as e:
       print(f"Error in get_cash_account: {e}")
@@ -93,15 +105,17 @@ async def getSingleCashAccountOverview(id: int):
         if not accountData:
             raise HTTPException(status_code=404, detail="Cash account not found")
         
+        accountDataJson = {
+            "account_id": accountData['account'].id,
+            "account_name": accountData['account'].name,
+            "total_income": float(accountData['total_income']),
+            "total_expenses": float(accountData['total_expenses']),
+            "current_balance": float(accountData['total_income']) - float(accountData['total_expenses'])
+        }
+
         return JSONResponse(
             status_code=200,
-            content={
-              "account_id": accountData.account.id,
-              "account_name": accountData.account.name,
-              "total_income": accountData.total_income,
-              "total_expense": accountData.total_expense,
-              "current_balance": accountData.total_income - accountData.total_expense
-            }
+            content={'account': accountDataJson}
         )
     except Exception as e:
       print(f"Error in get_cash_account: {e}")

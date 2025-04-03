@@ -82,6 +82,7 @@ class OperationsRepository:
             operations = (
                 session.query(Operations)
                 .join(Account, Operations.account_id == Account.id)
+                .filter(Account.id == tg_id)
                 .order_by(Operations.created_at.desc())
                 .offset(offset)
                 .limit(limit)

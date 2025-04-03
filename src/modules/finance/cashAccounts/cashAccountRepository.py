@@ -61,9 +61,17 @@ class CashAccountRepository:
             return None
 
     @staticmethod
-    def getAll(session: Session, skip: int, limit: int):
+    def getAll(session: Session, tg_id: int, page: int = 1, limit: int = 100):
         try:
-            query: Select = select(CashAccount).offset(skip).limit(limit)
+            page = max(1, page)
+            offset = (page - 1) * limit
+            query: Select = (
+                select(CashAccount)
+                .join(Account, CashAccount.account_id == Account.id)
+                .filter(Account.id == tg_id)
+                .offset(offset)
+                .limit(limit)
+            )
             accounts_result: Result = session.execute(query)
             return accounts_result.scalars().all()
         except SQLAlchemyError as e:
