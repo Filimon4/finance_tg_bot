@@ -13,23 +13,28 @@ async def getOverview(tg_id: str = Query(None)):
         with DB.get_session() as session:
             allCategories = CategoryRepository.getAll(session, tg_id)
             
-            total_overview = {
-                "balance": float(0),
-                "total_income": float(0),
-                "total_expenses": float(0),
-            }
+            total_overview = []
 
             for cat in allCategories: 
-                print(cat.id)
+                print(cat.id, cat.account_id, cat.name)
                 cat_overview = CategoryRepository.getCategoryOverview(session, tg_id, cat.id)
-                total_overview["total_income"] += float(cat_overview["total_income"])
-                total_overview["total_expenses"] += float(cat_overview["total_expenses"])
 
-            total_overview["balance"] = float(total_overview['total_income'] - total_overview["total_expenses"])
+                total_income = float(cat_overview["total_income"])
+                total_expenses = float(cat_overview["total_expenses"])
+
+                total_overview.append({
+                    'id': cat.id,
+                    'name': cat.name,
+                    'overview': {
+                        "total_income": total_income,
+                        "total_expenses": total_expenses,
+                        "balance": float(total_income - total_expenses),
+                    }
+                })
 
             return JSONResponse(
                 status_code=200,
-                content={**total_overview},
+                content={'total_overview': total_overview},
             )
     except Exception as e:
         print(e)
