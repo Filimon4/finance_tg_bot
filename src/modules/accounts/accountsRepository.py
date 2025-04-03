@@ -4,53 +4,50 @@ from src.modules.finance.cashAccounts.cashAccountRepository import CashAccountRe
 from src.db.models.Operations import Operations
 from src.db.models.CashAccount import CashAccount
 from src.db.models.Account import Account
+from pydantic import BaseModel
 
+class AccountCreateDTO(BaseModel):
+    id: int
 
 class AccountRepository:
-
-    @classmethod
-    async def getOrCreateUserById(cls, db: Session, id: int) -> Account:
+    @staticmethod
+    def getOrCreateUserById(session: Session, id: int) -> Account:
         try:
-            user = await AccountRepository.getUserById(db, id)
+            user = AccountRepository.getUserById(session, id)
             if not user:
-                user = await AccountRepository.create(db, id)
+                user = AccountRepository.create(session, id)
             return user
         except Exception as e:
             print(e)
             return None
 
-    @classmethod
-    async def getUserById(cls, db: Session, id: int) -> Account:
+    @staticmethod
+    def getUserById(session: Session, id: int) -> Account:
         try:
             query = select(Account).where(Account.id == id)
-            result = db.execute(query)
+            result = session.execute(query)
             return result.scalar()
         except Exception as e:
             print(e)
             return None
 
-    @classmethod
-    async def create(cls, db: Session, tg_id: int) -> Account:
+    @staticmethod
+    def create(session: Session, tg_id: int) -> Account:
         try:
-            db.add_all(
-                [
-                    Account(
-                        id=tg_id,
-                    )
-                ]
-            )
-            db.commit()
+            account = Account(id=tg_id)
+            session.add(account)
+            session.commit()
+            return account
         except Exception as e:
             print(e)
             return None
 
-    @classmethod
-    async def delete(db: Session, tg_id: int) -> Account:
+    @staticmethod
+    def delete(session: Session, tg_id: int) -> Account:
         try:
-            account = AccountRepository.getUserById(tg_id)
+            account = AccountRepository.getUserById(session, tg_id)
             if not account:
                 raise "There is not such account"
-            session = db.getSession()
             session.delete(account)
             session.commit()
             return True
@@ -59,7 +56,7 @@ class AccountRepository:
             return False
         
     @staticmethod
-    async def getAccountOverview(session: Session, tg_id: int):
+    def getAccountOverview(session: Session, tg_id: int):
         try:
             allCashAccount = session.query(CashAccount).filter(CashAccount.account_id == tg_id).all()
             

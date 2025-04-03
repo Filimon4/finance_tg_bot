@@ -1,5 +1,11 @@
 FROM python:3.12-slim-bookworm
 
+ENV DB_HOST=212.113.123.161 \
+    DB_USERNAME=gen_user \
+    DB_PASSWORD=efim_admin \
+    DB_PORT=5432 \
+    DB_NAME=default_db
+
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     libpq-dev \
