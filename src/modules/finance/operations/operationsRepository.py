@@ -9,12 +9,12 @@ from src.db.models.Operations import Operations
 from src.modules.finance.types import OperationType 
 
 class OperationCreateDTO(BaseModel):
-    tg_id: int
+    id: int
     cash_account_id: int
     to_cash_account_id: int | None
     category_id: int
     amount: int
-    description: str
+    description: str | None
     type: OperationType
 
 class OperationUpdateDTO(BaseModel):
@@ -32,15 +32,14 @@ class OperationsRepository:
         try:
             print(data)
             operation = Operations(
-                account_id = data.tg_id,
+                account_id = data.id,
                 cash_account_id = data.cash_account_id,
                 to_cash_account_id = data.to_cash_account_id,
                 category_id = data.category_id,
                 amount = data.amount,
-                description = data.description,
+                description = data.description if data.description else '',
                 type = data.type
             )
-            print(operation)
             session.add(operation)
             session.commit()
             return operation

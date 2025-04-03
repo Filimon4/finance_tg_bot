@@ -10,7 +10,7 @@ from pydantic import BaseModel
 from ..index import app
 from sqlalchemy.orm import Session
 
-@app.get("/api/cash_accounts/get_all", tags=['Cash Account'], description='Получить список всех кассовых счетов')
+@app.get("/api/cash_accounts/all", tags=['Cash Account'], description='Получить список всех кассовых счетов')
 async def getCashAccounts(tg_id: int = Query(None), page: int = 0, limit: int = 100):
     try:
         with DB.get_session() as session:
@@ -37,7 +37,7 @@ async def getCashAccounts(tg_id: int = Query(None), page: int = 0, limit: int = 
         )
             
 
-@app.get("/api/cash_accounts/get_one", tags=['Cash Account'], description='Получить кассовый счет по ID')
+@app.get("/api/cash_accounts/one", tags=['Cash Account'], description='Получить кассовый счет по ID')
 async def getCashAccount(id: int):
     try:
         with DB.get_session() as session:

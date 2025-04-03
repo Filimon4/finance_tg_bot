@@ -7,8 +7,37 @@ from src.modules.finance.operations.operationsRepository import OperationsReposi
 
 from ..index import app
 
+@app.get("/api/categories/all", tags=['Categories'])
+async def all(tg_id: int = Query(None)):
+    try:
+        with DB.get_session() as session:
+            allCategories = CategoryRepository.getAll(session, tg_id)
+            print(allCategories[0].base_type.name)
+            
+            allCategoriesJson = [
+                {
+                    'id': cat.id,
+                    'name': cat.name,
+                    'base_type': cat.base_type.name if cat.base_type else 'none',
+                    'created_at': str(cat.created_at),
+                }
+                for cat in allCategories 
+            ]
+
+            return JSONResponse(
+                status_code=200,
+                content={"success": True, 'all': allCategoriesJson},
+            )
+            
+    except Exception as e:
+        print(e)
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": str(e)}
+        )
+
 @app.get("/api/categories/overview", tags=['Categories'])
-async def getOverview(tg_id: str = Query(None)):
+async def getOverview(tg_id: int = Query(None)):
     try:
         with DB.get_session() as session:
             allCategories = CategoryRepository.getAll(session, tg_id)
@@ -34,7 +63,7 @@ async def getOverview(tg_id: str = Query(None)):
 
             return JSONResponse(
                 status_code=200,
-                content={'total_overview': total_overview},
+                content={"success": True, 'total_overview': total_overview},
             )
     except Exception as e:
         print(e)
