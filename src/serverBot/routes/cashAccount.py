@@ -27,7 +27,7 @@ async def getCashAccounts(tg_id: int = Query(None), page: int = 0, limit: int = 
             ]
             return JSONResponse(
                 status_code=200,  # Исправлено с 500 на 200 (успешный запрос)
-                content={"success": True, "accounts": account_data}
+                content={"success": True, "all": account_data}
             )
     except Exception as e:
         print(f"Error in getCashAccounts: {e}")
