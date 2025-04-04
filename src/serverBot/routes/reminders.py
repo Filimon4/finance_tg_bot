@@ -7,7 +7,7 @@ from src.modules.finance.cashAccounts.cashAccountRepository import CashAccountRe
 from src.modules.finance.operations.operationsRepository import OperationsRepository
 from ..index import app
 
-@app.get('/api/notifies/all', tags=['Notifies'])
+@app.get('/api/reminders/all', tags=['Reminders'])
 def getAllNotifies():
   try:
     with DB.get_session() as session:
@@ -33,7 +33,7 @@ def getAllNotifies():
         content={"success": False, "error": str(e)}
     )
 
-@app.post('/api/notifies/create', tags=['Notifies'])
+@app.post('/api/reminders', tags=['Reminders'])
 def createNotify(data: ReminderCreateDTO):
   try:
     with DB.get_session() as session:
@@ -57,7 +57,7 @@ def createNotify(data: ReminderCreateDTO):
         content={"success": False, "error": str(e)}
     )
 
-@app.patch('/api/notifies/update', tags=['Notifies'])
+@app.patch('/api/reminders', tags=['Reminders'])
 def updateNotify(data: ReminderUpdateDTO):
   try:
     with DB.get_session() as session:
@@ -83,7 +83,7 @@ def updateNotify(data: ReminderUpdateDTO):
         status_code=500,
         content={"success": False, "error": str(e)}
     )
-@app.delete('/api/notifies/delete', tags=['Notifies'])
+@app.delete('/api/reminders', tags=['Reminders'])
 def deleteNotify(id: int = Query(None)):
   try:
     with DB.get_session() as session:
