@@ -7,7 +7,7 @@ class CashAccount(Base):
     __tablename__ = "cash_account"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(VARCHAR(255), nullable=False)
+    name = Column(VARCHAR(255), nullable=False, unique=True)
     created_at = Column(TIMESTAMP, default=func.now())
     account_id = Column(Integer, ForeignKey("account.id"), nullable=False)
     currency_id = Column(Integer, ForeignKey("currency.id"), nullable=False)
