@@ -126,7 +126,7 @@ async def getSingleCashAccountOverview(id: int):
 
 
 @app.post("/api/cash_accounts/create", tags=['Cash Account'], description='Создать новый кассовый счет')
-async def creatCashAccount(account_data: CashAccountCreate):
+async def createCashAccount(account_data: CashAccountCreate):
     try:
       with DB.get_session() as session:
         new_account = CashAccount(
@@ -135,7 +135,7 @@ async def creatCashAccount(account_data: CashAccountCreate):
           currency_id=account_data.currency_id
         )
         session.add(new_account)
-        session.refresh(new_account)
+        session.commit()
         print(new_account)
         return new_account
     except Exception as e:
