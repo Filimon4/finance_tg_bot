@@ -20,6 +20,7 @@ from .routes.reminders import *
 from .routes.categories import *
 from .routes.cashAccount import *
 from .routes.account import *
+from .routes.currencies import *
 
 @app.get('/health')
 def getApiHealth():

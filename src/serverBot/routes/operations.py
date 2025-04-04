@@ -77,7 +77,6 @@ async def createOperation(data: OperationCreateDTO):
             if data.to_cash_account_id == data.cash_account_id: 
                 raise Exception('to_cash_account_id equls cash_account_id')
             
-            
             operation = OperationsRepository.create(session, data)
             operation_data = {
                 'id': operation.id,
