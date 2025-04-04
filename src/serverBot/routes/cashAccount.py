@@ -19,9 +19,9 @@ async def getCashAccounts(tg_id: int = Query(None), page: int = 0, limit: int = 
                 {
                     "id": acc.id,
                     "name": acc.name,
-                    "created_at": acc.created_at,
                     "account_id": acc.account_id,
                     "currency_id": acc.currency_id,
+                    "created_at": str(acc.created_at),
                 }
                 for acc in accounts
             ]
