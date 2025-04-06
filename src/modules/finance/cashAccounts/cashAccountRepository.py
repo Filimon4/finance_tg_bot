@@ -59,6 +59,13 @@ class CashAccountRepository:
         except SQLAlchemyError as e:
             print(f"Ошибка при получении аккаунта: {e}")
             return None
+    
+    @staticmethod
+    def getMain(session: Session, tg_id: int):
+        try:
+            return session.query(CashAccount).filter(CashAccount.main == True, CashAccount.account_id == tg_id).first()
+        except SQLAlchemyError as e:
+            return None
 
     @staticmethod
     def getAll(session: Session, tg_id: int, page: int = 1, limit: int = 100):

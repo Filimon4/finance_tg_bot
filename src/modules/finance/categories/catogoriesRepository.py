@@ -49,6 +49,13 @@ class CategoryRepository:
             return None
         
     @staticmethod
+    def getByName(session: Session, tg_id: int, name: str):
+        try:
+            return session.query(Category).filter(Category.name == name).first()
+        except SQLAlchemyError as e:
+            return None
+        
+    @staticmethod
     def getAll(session: Session, tg_id: int):
         try:
             return session.query(Category).filter(Category.account_id == tg_id).all()
