@@ -1,4 +1,4 @@
-from sqlalchemy import TIMESTAMP, Column, ForeignKey, Integer, VARCHAR, func
+from sqlalchemy import TIMESTAMP, Column, ForeignKey, Integer, VARCHAR, UniqueConstraint, func
 from ..index import Base
 from sqlalchemy.orm import relationship
 
@@ -7,7 +7,7 @@ class CashAccount(Base):
     __tablename__ = "cash_account"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(VARCHAR(255), nullable=False, unique=True)
+    name = Column(VARCHAR(255), nullable=False)
     created_at = Column(TIMESTAMP, default=func.now())
     account_id = Column(Integer, ForeignKey("account.id"), nullable=False)
     currency_id = Column(Integer, ForeignKey("currency.id"), nullable=False)
@@ -22,4 +22,8 @@ class CashAccount(Base):
         "Operations",
         foreign_keys="[Operations.to_cash_account_id]",
         back_populates="to_account",
+    )
+
+    __table_args__ = (
+        UniqueConstraint("name", "account_id", name="uq_cash_account_name_per_account"),
     )

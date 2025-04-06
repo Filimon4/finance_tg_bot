@@ -15,8 +15,8 @@ async def start(message: Message):
     print(tg_id)
     if not tg_id:
         return
-    user = await AccountRepository.getOrCreateUserById(tg_id)
-    print(user)
+    # user = await AccountRepository.getOrCreateUserById(tg_id)
+    # print(user)
     await message.answer(text="Спасибо что пользуетесь нашим приложением")
 
 

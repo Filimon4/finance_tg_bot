@@ -15,6 +15,7 @@ async def getCategoryOperations(cash_account_id: int = Query(None), page: int = 
             operations = OperationsRepository.getOperationsByCashAccount(session, cash_account_id, page, limit)
             operations_data = [{
                 'id': op.id,
+                'name': op.name,
                 'cash_account_id': op.cash_account_id,
                 'to_cash_account_id': op.to_cash_account_id,
                 'category_id': op.category_id,
@@ -49,6 +50,7 @@ async def getOperations(tg_id: int = Query(None), page: int = Query(1), limit: i
             for operation in operations:
                 operation_dict = {
                     "id": operation.id,
+                    "name": operation.name,
                     "cash_account_id": operation.cash_account_id,
                     "to_cash_account_id": operation.to_cash_account_id,
                     "category_id": operation.category_id,
@@ -80,6 +82,7 @@ async def createOperation(data: OperationCreateDTO):
             operation = OperationsRepository.create(session, data)
             operation_data = {
                 'id': operation.id,
+                'name': operation.name,
                 'cash_account_id': operation.cash_account_id, 
                 'to_cash_account_id': operation.to_cash_account_id,
                 'category_id': operation.category_id,
@@ -123,6 +126,7 @@ async def updateOperation(data: OperationUpdateDTO):
 
             operation_data = {
                 'id': updated_operation.id,
+                'name': updated_operation.name,
                 'cash_account_id': updated_operation.cash_account_id, 
                 'to_cash_account_id': updated_operation.to_cash_account_id,
                 'category_id': updated_operation.category_id,

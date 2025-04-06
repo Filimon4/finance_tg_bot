@@ -136,8 +136,16 @@ async def createCashAccount(account_data: CashAccountCreate):
         )
         session.add(new_account)
         session.commit()
-        print(new_account)
-        return new_account
+        return JSONResponse(
+           status_code=200,
+           content={"success": True, "account": {
+                    "id": new_account.id,
+                    "name": new_account.name,
+                    "account_id": new_account.account_id,
+                    "currency_id": new_account.currency_id,
+                    "created_at": str(new_account.created_at),
+                }}
+        )
     except Exception as e:
       print(f"Error in get_cash_account: {e}")
       return JSONResponse(

@@ -7,8 +7,35 @@ from src.modules.finance.operations.operationsRepository import OperationsReposi
 
 from ..index import app
 
+@app.get("/api/account/balance_six_month", tags=['Account'])
+def balanceSixM(tg_id: int = Query(None)):
+    try:
+        with DB.get_session() as session:
+            sixMonthOverview = AccountRepository.getAccountSixMonthOverview(session, tg_id)
+
+            sixMonthOverviewJson = [
+                {
+                    "month": month_year.split('-')[1],  # только месяц "04"
+                    "year": month_year.split('-')[0],   # только год "2025"
+                    "month_year": month_year,           # полная дата "2025-04"
+                    "balance": float(balance) if balance is not None else 0.0
+                }
+                for month_year, balance in sixMonthOverview
+            ]
+
+            return JSONResponse(
+                status_code=200,
+                content={"success": True, "data": sixMonthOverviewJson}
+            )
+
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": str(e)}
+        )
+
 @app.get("/api/account/balance", tags=['Account'])
-def balance(tg_id: str = Query(None)):
+def balance(tg_id: int = Query(None)):
     try:
         with DB.get_session() as session:
             accountBalanceOverview = AccountRepository.getAccountOverview(session, tg_id)

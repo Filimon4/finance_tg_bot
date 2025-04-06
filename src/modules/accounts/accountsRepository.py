@@ -56,6 +56,44 @@ class AccountRepository:
             return False
         
     @staticmethod
+    def getAccountSixMonthOverview(session: Session, tg_id: int):
+        try:
+            query = text("""
+                WITH date_range AS (
+                    SELECT 
+                        DATE_TRUNC('month', CURRENT_DATE - INTERVAL '5 months') AS start_month,
+                        DATE_TRUNC('month', CURRENT_DATE) AS end_month
+                ),
+                monthly_totals AS (
+                    SELECT 
+                        DATE_TRUNC('month', created_at) AS month,
+                        SUM(CASE WHEN type = 'INCOME' THEN amount ELSE -amount END) AS monthly_balance
+                    FROM operations
+                    WHERE account_id = :account_id
+                    GROUP BY DATE_TRUNC('month', created_at)
+                ),
+                all_months AS (
+                    SELECT 
+                        generate_series(
+                            (SELECT start_month FROM date_range),
+                            (SELECT end_month FROM date_range),
+                            INTERVAL '1 month'
+                        )::date AS month
+                )
+                SELECT 
+                    TO_CHAR(am.month, 'YYYY-MM') AS month_year,
+                    COALESCE(SUM(mt.monthly_balance) OVER (ORDER BY am.month), 0) AS cumulative_balance
+                FROM all_months am
+                LEFT JOIN monthly_totals mt ON am.month = mt.month
+                ORDER BY am.month;
+            """)
+            
+            return session.execute(query, {'account_id': tg_id}).fetchall()
+        except Exception as e:
+            print(e)
+            return None
+        
+    @staticmethod
     def getAccountOverview(session: Session, tg_id: int):
         try:
             allCashAccount = session.query(CashAccount).filter(CashAccount.account_id == tg_id).all()

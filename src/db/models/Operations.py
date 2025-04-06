@@ -3,6 +3,7 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     Numeric,
+    String,
     Text,
     TIMESTAMP,
     func,
@@ -18,6 +19,7 @@ class Operations(Base):
     __tablename__ = "operations"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(255))
     cash_account_id = Column(Integer, ForeignKey("cash_account.id"), nullable=False)
     to_cash_account_id = Column(Integer, ForeignKey("cash_account.id"), nullable=True)
     category_id = Column(Integer, ForeignKey("category.id"), nullable=False)

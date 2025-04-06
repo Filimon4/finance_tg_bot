@@ -9,7 +9,8 @@ from src.db.models.Operations import Operations
 from src.modules.finance.types import OperationType 
 
 class OperationCreateDTO(BaseModel):
-    id: int
+    account_id: int
+    name: str
     cash_account_id: int
     to_cash_account_id: int | None
     category_id: int
@@ -19,6 +20,7 @@ class OperationCreateDTO(BaseModel):
 
 class OperationUpdateDTO(BaseModel):
     oper_id: int
+    name: str
     cash_account_id: int | None
     to_cash_account_id: int | None
     category_id: int | None
@@ -32,7 +34,8 @@ class OperationsRepository:
         try:
             print(data)
             operation = Operations(
-                account_id = data.id,
+                account_id = data.account_id,
+                name = data.name,
                 cash_account_id = data.cash_account_id,
                 to_cash_account_id = data.to_cash_account_id,
                 category_id = data.category_id,
