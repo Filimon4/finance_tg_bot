@@ -10,6 +10,13 @@ class RemindersRepository:
       return session.query(Reminder).all()
     except Exception as e:
       raise Exception(e)
+  
+  @staticmethod
+  def getById(session: Session, id: int):
+    try:
+      return session.query(Reminder).filter(Reminder.id == id).first()
+    except Exception as e:
+      raise Exception(e)
     
   @staticmethod
   def getAllById(session: Session, id: int):

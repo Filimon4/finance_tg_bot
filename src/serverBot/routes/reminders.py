@@ -34,7 +34,7 @@ def getAllNotifies():
     )
   
 @app.get('/api/reminders/users_reminders', tags=['Reminders'])
-def usersReminders(tg_id: int = Query(None)):
+def getById(tg_id: int = Query(None)):
   try:
     with DB.get_session() as session:
       reminders = RemindersRepository.getAllById(session, tg_id)
@@ -53,6 +53,30 @@ def usersReminders(tg_id: int = Query(None)):
       return JSONResponse(
         status_code=200,
         content={"success": True, 'reminders': remindersJson}
+      )
+  except Exception as e:
+    return JSONResponse(
+        status_code=500,
+        content={"success": False, "error": str(e)}
+    )
+    
+@app.get('/api/reminders/one', tags=['Reminders'])
+def getById(id: int = Query(None)):
+  try:
+    with DB.get_session() as session:
+      reminder = RemindersRepository.getById(session, id)
+      remindersJson = {
+        'id': reminder.id,
+        'day_of_week': reminder.day_of_week.name if reminder.day_of_week is not None else None,
+        'hour': str(reminder.hour),
+        'next_time': str(reminder.next_time),
+        'is_active': reminder.is_active,
+        'created_at': str(reminder.created_at),
+        'account_id': reminder.account_id,
+      }
+      return JSONResponse(
+        status_code=200,
+        content={"success": True, 'reminder': remindersJson}
       )
 
   except Exception as e:
