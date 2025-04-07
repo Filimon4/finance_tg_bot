@@ -1,6 +1,10 @@
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from src.db.models.Reminder import Reminder, ReminderCreateDTO, ReminderUpdateDTO
 from sqlalchemy.exc import SQLAlchemyError
+
+class ReminderDeleteData(BaseModel):
+  id: int
 
 class RemindersRepository:
 
@@ -45,9 +49,12 @@ class RemindersRepository:
   @staticmethod
   def delete(session: Session, id: int):
     try:
-      deleted = session.query(Reminder).where(Reminder.id == id).delete()
+      print('delete reminder: ', id)
+      deleted_count = session.query(Reminder).where(Reminder.id == id).delete()
       session.commit()
-      return deleted
+      return deleted_count > 0
+    except SQLAlchemyError as e:
+      raise Exception(e)
     except Exception as e:
       raise Exception(e)
     

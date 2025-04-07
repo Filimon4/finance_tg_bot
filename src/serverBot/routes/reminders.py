@@ -1,7 +1,7 @@
 from fastapi import Query, Request
 from fastapi.responses import JSONResponse
 from src.db.models.Reminder import ReminderCreateDTO, ReminderUpdateDTO
-from src.modules.reminders.remindersRepository import RemindersRepository
+from src.modules.reminders.remindersRepository import ReminderDeleteData, RemindersRepository
 from src.db.index import DB
 from src.modules.finance.cashAccounts.cashAccountRepository import CashAccountRepository
 from src.modules.finance.operations.operationsRepository import OperationsRepository
@@ -136,10 +136,10 @@ def updateNotify(data: ReminderUpdateDTO):
         content={"success": False, "error": str(e)}
     )
 @app.delete('/api/reminders', tags=['Reminders'])
-def deleteNotify(id: int = Query(None)):
+def deleteNotify(data: ReminderDeleteData):
   try:
     with DB.get_session() as session:
-      deleted = RemindersRepository.delete(session, id)
+      deleted = RemindersRepository.delete(session, data.id)
       if not deleted: raise Exception('Failed to delete')
       return JSONResponse(
         status_code=200,
