@@ -1,4 +1,5 @@
 import asyncio
+from asyncio.log import logger
 import os
 
 import src.db.index
@@ -11,5 +12,5 @@ async def main():
 
 
 if __name__ == "__main__":
-    print("Запуск бота")
+    logger.info('-- Start Bot')
     asyncio.run(main())
