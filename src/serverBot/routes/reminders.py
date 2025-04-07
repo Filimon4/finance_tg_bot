@@ -16,9 +16,9 @@ def getAllNotifies():
         {
           'id': r.id,
           'day_of_week': r.day_of_week.name, 
-          'time': str(r.time),
+          'hour': str(r.hour),
           'next_time': str(r.next_time),
-          'is_acitve': r.is_acitve,
+          'is_active': r.is_active,
           'created_at': str(r.created_at),
         }
         for r in reminders 
@@ -42,9 +42,9 @@ def usersReminders(tg_id: int = Query(None)):
         {
           'id': rem.id,
           'day_of_week': rem.day_of_week.name if rem.day_of_week is not None else None,
-          'time': str(rem.time),
+          'hour': str(rem.hour),
           'next_time': str(rem.next_time),
-          'is_acitve': rem.is_acitve,
+          'is_active': rem.is_active,
           'created_at': str(rem.created_at),
           'account_id': rem.account_id,
         }
@@ -70,9 +70,9 @@ def createNotify(data: ReminderCreateDTO):
         'id': newReminder.id,
         'account_id': newReminder.account_id,
         'day_of_week': newReminder.day_of_week.name,
-        'time': str(newReminder.time),
+        'hour': str(newReminder.hour),
         'next_time': str(newReminder.next_time),
-        'is_acitve': newReminder.is_acitve,
+        'is_active': newReminder.is_active,
         'created_at': str(newReminder.created_at),
       }
       return JSONResponse(
@@ -97,9 +97,9 @@ def updateNotify(data: ReminderUpdateDTO):
         'id': reminders.id,
         'account_id': reminders.account_id,
         'day_of_week': reminders.day_of_week.name,
-        'time': str(reminders.time),
+        'hour': str(reminders.hour),
         'next_time': str(reminders.next_time),
-        'is_acitve': reminders.is_acitve,
+        'is_active': reminders.is_active,
         'created_at': str(reminders.created_at),
       }
       return JSONResponse(

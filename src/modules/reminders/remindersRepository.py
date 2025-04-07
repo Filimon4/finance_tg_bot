@@ -26,8 +26,8 @@ class RemindersRepository:
       reminder = Reminder(
         account_id = data.account_id,
         day_of_week = data.day_of_week,
-        time = data.time,
-        is_acitve = data.is_acitve,
+        hour = data.hour,
+        is_active = data.is_active,
       )
       session.add(reminder)
       session.commit()
@@ -54,8 +54,8 @@ class RemindersRepository:
       
       if hasattr(data, 'day_of_week'):
         reminder.day_of_week = data.day_of_week if not None else None
-      if hasattr(data, 'time'):
-        reminder.time = data.time if not None else None
+      if hasattr(data, 'hour'):
+        reminder.hour = data.hour if not None else None
       if hasattr(data, 'is_acitve'):
         reminder.is_acitve = data.is_acitve if not None else None
 
