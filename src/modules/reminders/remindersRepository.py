@@ -12,6 +12,15 @@ class RemindersRepository:
       raise Exception(e)
     
   @staticmethod
+  def getAllById(session: Session, id: int):
+    try:
+      return session.query(Reminder).filter(Reminder.account_id == id).all()
+    except SQLAlchemyError as e:
+      raise Exception(e)
+    except Exception as e:
+      raise Exception(e)
+    
+  @staticmethod
   def create(session: Session, data: ReminderCreateDTO):
     try:
       reminder = Reminder(
