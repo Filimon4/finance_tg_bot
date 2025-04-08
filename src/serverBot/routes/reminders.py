@@ -15,7 +15,7 @@ def getAllNotifies():
       reminders_data = [
         {
           'id': r.id,
-          'day_of_week': r.day_of_week.name, 
+          'day_of_week': r.day_of_week.value, 
           'hour': str(r.hour),
           'next_time': str(r.next_time),
           'is_active': r.is_active,
