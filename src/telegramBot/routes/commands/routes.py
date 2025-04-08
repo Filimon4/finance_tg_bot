@@ -115,7 +115,7 @@ async def inline_operations(message: Message):
         await message.answer(text=f"Ошибка при добавлении операции")
 
 
-@BotDispatcher.message(Command(commands=BotTgCommands.SEND_ALL_REMINDERS.value))
+@BotDispatcher.message(Command(commands=BotTgCommands.CHECK_ALL_REMINDERS.value))
 async def send_all_reminders(message: Message):
     try:
         return
