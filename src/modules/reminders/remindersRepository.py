@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from src.db.models.Account import Account
 from src.db.models.Reminder import Reminder, ReminderCreateDTO, ReminderUpdateDTO
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -9,9 +10,20 @@ class ReminderDeleteData(BaseModel):
 class RemindersRepository:
 
   @staticmethod
-  def getAll(session: Session):
+  def getAll(session: Session, tg_id: int, page: int = 1, limit: int = 100):
     try:
-      return session.query(Reminder).all()
+      page = max(1, page)
+      offset = (page - 1) * limit
+      reminders = (
+          session.query(Reminder)
+          .join(Account, Reminder.account_id == Account.id)
+          .filter(Account.id == tg_id)
+          .order_by(Reminder.created_at.desc())
+          .offset(offset)
+          .limit(limit)
+          .all()
+      )
+      return reminders
     except Exception as e:
       raise Exception(e)
   

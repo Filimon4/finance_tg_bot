@@ -23,13 +23,6 @@ python ./src/index.py
 
 Для бота нужны рауты по которым он будет слушать сообщения, для этого есть папка routes. Файлы этой папки с названиям routes загружаются автоматически при старке бота.
 
-Загрузка происходит вот таким образом:
-
-```py
-from utils.loadModulesByRegex import load_modules_by_regex
-load_modules_by_regex(os.path.dirname('src/routes'), r'routes.py')
-```
-
 Поэтому для всех раутов создаём файл routes.py
 
 ## IDE
@@ -57,5 +50,5 @@ alembic upgrade head
 ## Fastify Server
 Что запустить севрер для миниапы нужно запустить команду из папки ./src/serverBot
 ```cmd
-uvicorn index:app --reload --port 9000
+python ./mini_app_server.py
 ```
