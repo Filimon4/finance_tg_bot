@@ -139,3 +139,4 @@ class CurrencyRepository:
             'updated_at': rate.created_at
         } for rate, code, currency_name in rates]
     
+
