@@ -1,3 +1,4 @@
+import asyncio
 from asyncio.log import logger
 import schedule
 
@@ -27,27 +28,33 @@ class ReminderSystem:
 
     def __init__(self):
         logger.info('-- Start ReminderSystem')
-        self._fetch_interval = 1
+        self._fetch_interval = 60
         self._setup_scheduler()
+        self._loop = asyncio.new_event_loop()  # Создаем свой event loop
 
     def _setup_scheduler(self):
-        schedule.every(self._fetch_interval).minutes.do(self.startFetching)
+        schedule.every(self._fetch_interval).minutes.do(self._startFetching_sync)
 
-    def sendReminder(self, reminder) -> bool:
+    def _startFetching_sync(self):
+        asyncio.set_event_loop(self._loop)
+        self._loop.run_until_complete(self.startFetching())
+
+    async def sendReminder(self, reminder) -> bool:
         try:
-            user_id = reminder['account']['id']
-            MainBotTg.send_message(text='Напоминание', chat_id=user_id)
+            user_id = reminder.account.id
+            await MainBotTg.send_message(text='🔔 Напоминание: ', chat_id=user_id)
             return True
         except Exception as e:
             print(f"Ошибка при отправке напоминания: {e}")
             return False
 
-    def startFetching(self):
+    async def startFetching(self):
         try:
+
             with DB.get_session() as session:
-                for reminder in self.paginatedRemindersGenerator(session):
-                    print(reminder)
-                    self.sendReminder(reminder)
+                for reminders in self.paginatedRemindersGenerator(session):
+                    for reminder in reminders:
+                        await self.sendReminder(reminder)
         except SQLAlchemyError as e:
             print(e)
 

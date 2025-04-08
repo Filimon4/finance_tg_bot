@@ -21,6 +21,7 @@ from .routes.categories import *
 from .routes.cashAccount import *
 from .routes.account import *
 from .routes.currencies import *
+from .routes.export import *
 
 @app.get('/api/health')
 def getApiHealth():
