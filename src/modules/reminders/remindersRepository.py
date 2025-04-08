@@ -48,7 +48,7 @@ class RemindersRepository:
 
       offset = (max(page, 1) - 1) * limit
       reminders = query.offset(offset).limit(limit).all()
-      
+
       return {
           "reminders": reminders,
           "page": page,

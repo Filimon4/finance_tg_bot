@@ -3,7 +3,6 @@ from aiogram import Bot
 
 from src.telegramBot.config.consts.Commands import Commands
 
-
 class BotTg(Bot):
 
     def __init__(self, *args, **kwargs):
@@ -17,3 +16,4 @@ TOKEN = os.getenv("BOT_TOKEN")
 if not TOKEN:
     raise ValueError("Переменная окружения 'BOT_TOKEN' не найдена!")
 MainBotTg = BotTg(token=TOKEN)
+
