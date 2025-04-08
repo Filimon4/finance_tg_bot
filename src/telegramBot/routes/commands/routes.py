@@ -1,5 +1,7 @@
+import datetime
 import re
 from aiogram import F
+from modules.excelReportGenerator.index import ExcelReportGenerator
 from src.modules.finance.types import OperationType
 from src.modules.finance.cashAccounts.cashAccountRepository import CashAccountRepository
 from src.modules.finance.categories.catogoriesRepository import CategoryRepository
@@ -37,20 +39,51 @@ async def export(message: Message):
             return
 
         command, month = matched.groups()
+        month = int(month)
         await MainBotTg.send_message(text=f'Экспорт данных за {month} мес.', chat_id=message.chat.id)
-        with DB.get_session() as session:
-            history = None
-            #TODO: Взять данные из бд
-            #TODO: Закинуть в формировщик exel
-            #TODO: Скинуть пользователю
         
-        await message.answer(text='Данные были успешно экспортированны в файл')
+        with DB.get_session() as session:
+            # Получаем текущую дату и вычисляем дату начала периода
+            end_date = datetime.now()
+            start_date = end_date - datetime.timedelta(days=30*month)
+            
+            # Получаем данные из БД за указанный период
+            operations = OperationsRepository.get_operations_by_date_range(
+                session=session,
+                start_date=start_date,
+                end_date=end_date
+            )
+            
+            # Создаем отчет
+            report_generator = ExcelReportGenerator()
+            
+            # Конвертируем операции в DTO и добавляем в отчет
+            report_data_list = [
+                ReportDTO(
+                    date=op.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                    category=op.category.name if op.category else "Без категории",
+                    amount=float(op.amount),
+                    description=op.description or "",
+                    user_id=op.account_id or 0,
+                    username=op.account.username if op.account else "Неизвестный"
+                ) for op in operations
+            ]
+            
+            # Генерируем Excel файл
+            report_path = report_generator.generate_report(report_data_list)
+            
+            # Отправляем файл пользователю
+            with open(report_path, 'rb') as file:
+                await message.answer_document(document=file, caption=f"Отчет за {month} месяцев")
+        
     except SQLAlchemyError as e:
         print(e)
         await message.answer(text="Произошла ошибка при экспорте данных")
     except Exception as e:
         print(e)
         await message.answer(text="Произошла ошибка при экспорте данных")
+
+        
 
 @BotDispatcher.message(F.text.regexp(r"^[+-]\s*\d+(\.\d+)?"))
 async def inline_operations(message: Message):

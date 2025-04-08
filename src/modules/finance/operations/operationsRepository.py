@@ -29,6 +29,32 @@ class OperationUpdateDTO(BaseModel):
     type: OperationType | None
 
 class OperationsRepository:
+    
+    @staticmethod
+    def getPaginatedOperations(session: Session, page: int = 1, limit: int = 40, account_id: int = None):
+        try:
+            query = (
+                session
+                .query(Operations)
+                .order_by(Operations.created_at)
+            )
+
+            if account_id is not None:
+                query = query.filter(Operations.account_id == account_id)
+
+            offset = (max(page, 1) - 1) * limit
+            operations = query.offset(offset).limit(limit).all()
+            
+            return {
+                "operations": operations,
+                "page": page,
+                "limit": limit,
+            }
+        except Exception as e:
+            raise Exception(e)
+        except SQLAlchemyError as e:
+            raise Exception(e)
+
     @staticmethod
     def create( session: Session, data: OperationCreateDTO):
         try:

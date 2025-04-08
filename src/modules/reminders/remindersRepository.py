@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from src.db.models.Operations import Operations
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from src.db.models.Account import Account
@@ -136,3 +137,11 @@ class RemindersRepository:
       raise Exception(e)
     except Exception as e:
       raise Exception(e)
+    
+  @staticmethod
+  def get_operations_by_date_range(session: Session, start_date: datetime, end_date: datetime):
+      return session.query(Operations)\
+          .filter(Operations.created_at >= start_date)\
+          .filter(Operations.created_at <= end_date)\
+          .order_by(Operations.created_at)\
+          .all()
