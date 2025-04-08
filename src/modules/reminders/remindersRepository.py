@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from src.db.models.Operations import Operations
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from src.db.models.Account import Account
