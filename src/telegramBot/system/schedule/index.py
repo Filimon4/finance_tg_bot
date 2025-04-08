@@ -9,9 +9,8 @@ class ScheduleSystem:
 
     def start(self):
         while True:
-            print('run pending')
             schedule.run_pending()
-            time.sleep(1)
+            time.sleep(5)
 
 
 Schedule = ScheduleSystem()

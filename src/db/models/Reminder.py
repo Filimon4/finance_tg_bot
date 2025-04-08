@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from sqlalchemy import (
     CheckConstraint,
     Column,
+    Index,
     Integer,
     Enum,
     TIMESTAMP,
@@ -46,4 +47,5 @@ class Reminder(Base):
     __table_args__ = (
         CheckConstraint("hour >= 0 and hour <= 24", 
                       name="ck_hour_reminder"),
+        Index("ix_reminder_active_next", "is_active", "next_time"),
     )
