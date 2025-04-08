@@ -38,9 +38,17 @@ class RemindersRepository:
   @staticmethod
   def getPaginatedReminders(session: Session, page: int = 1, limit: int = 40):
     try:
-      query = session.query(Reminder).join(Account, Account.id == Reminder.account_id).filter(Reminder.is_active == True).order_by(Reminder.created_at)
+      query = (
+        session
+        .query(Reminder)
+        .join(Account, Account.id == Reminder.account_id)
+        .filter(Reminder.is_active == True)
+        .order_by(Reminder.created_at)
+      )
+
       offset = (max(page, 1) - 1) * limit
       reminders = query.offset(offset).limit(limit).all()
+      
       return {
           "reminders": reminders,
           "page": page,
@@ -52,17 +60,13 @@ class RemindersRepository:
       raise Exception(e)
 
   @staticmethod
-  def getAll(session: Session):
+  def getAll(session: Session, tg_id: int):
     try:
-      page = max(1, page)
-      offset = (page - 1) * limit
       reminders = (
           session.query(Reminder)
           .join(Account, Reminder.account_id == Account.id)
           .filter(Account.id == tg_id)
           .order_by(Reminder.created_at.desc())
-          .offset(offset)
-          .limit(limit)
           .all()
       )
       return reminders

@@ -1,15 +1,11 @@
 from asyncio.log import logger
 import schedule
-import time
-from typing import Generator
 
 from src.telegramBot import MainBotTg
 from src.db.index import DB
 from sqlalchemy.orm import Session
 from src.modules.reminders.remindersRepository import RemindersRepository
 from sqlalchemy.exc import SQLAlchemyError
-
-import json
 
 class ReminderSystem:
 
@@ -24,14 +20,14 @@ class ReminderSystem:
                 if reminder.next_time is None:
                     reminder.next_time = RemindersRepository.calculateNextTime(reminder.day_of_week, reminder.hour)
             
-            session.commit() # Сохраняем все изменения разом
+            session.commit()
             yield data_reminders['reminders']
             page += 1
 
 
     def __init__(self):
         logger.info('-- Start ReminderSystem')
-        self._fetch_interval = 1  # интервал проверки в минутах
+        self._fetch_interval = 1
         self._setup_scheduler()
 
     def _setup_scheduler(self):
