@@ -3,7 +3,7 @@ from asyncio.log import logger
 import os
 
 import src.db.index
-from src.telegramBot import MainBotTg, BotDispatcher, Reminder
+from src.telegramBot import MainBotTg, BotDispatcher
 import src.telegramBot.routes.commands.routes
 
 async def main():

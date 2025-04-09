@@ -50,6 +50,10 @@ class Operations(Base):
             '(to_cash_account_id IS NOT NULL AND category_id IS NULL)',
             name='check_account_category_null_logic'
         ),
+        CheckConstraint(
+            'to_cash_account_id IS NULL OR type = "transfer"',
+            name='check_transfer_type_constraint'
+        ),
     )
 
     @validates('to_cash_account_id', 'category_id')

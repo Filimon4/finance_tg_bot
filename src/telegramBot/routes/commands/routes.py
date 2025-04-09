@@ -1,7 +1,8 @@
 import datetime
 import re
 from aiogram import F
-from modules.excelReportGenerator.index import ExcelReportGenerator
+
+from src.modules.excelReportGenerator.index import ExcelReportGenerator
 from src.modules.finance.types import OperationType
 from src.modules.finance.cashAccounts.cashAccountRepository import CashAccountRepository
 from src.modules.finance.categories.catogoriesRepository import CategoryRepository
@@ -16,6 +17,7 @@ from src.telegramBot import (
 from aiogram.filters import Command
 from aiogram.types import (
     Message,
+    BufferedInputFile
 )
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -32,56 +34,69 @@ async def start(message: Message):
 @BotDispatcher.message(Command(commands=BotTgCommands.EXPORT.value))
 async def export(message: Message):
     try:
+        user_id = message.from_user.id
         text = message.text.strip()
         matched = re.match(r'^(\/export)\s+(\d+)$', text)
         if not matched:
             await message.answer(text='Неправильный шаблон команды. Пример использования: /export 12')
             return
 
-        command, month = matched.groups()
+        _, month = matched.groups()
         month = int(month)
-        await MainBotTg.send_message(text=f'Экспорт данных за {month} мес.', chat_id=message.chat.id)
-        
+        await message.answer(f'🔍 Формирую отчет за {month} месяцев...')
+
         with DB.get_session() as session:
-            # Получаем текущую дату и вычисляем дату начала периода
-            end_date = datetime.now()
-            start_date = end_date - datetime.timedelta(days=30*month)
-            
-            # Получаем данные из БД за указанный период
-            operations = OperationsRepository.get_operations_by_date_range(
-                session=session,
-                start_date=start_date,
-                end_date=end_date
+            await ExcelReportGenerator.generate_and_send_report(
+                message=message,
+                month=month,
+                user_id=user_id,
+                session=session
             )
-            
-            # Создаем отчет
-            report_generator = ExcelReportGenerator()
-            
-            # Конвертируем операции в DTO и добавляем в отчет
-            report_data_list = [
-                ReportDTO(
-                    date=op.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-                    category=op.category.name if op.category else "Без категории",
-                    amount=float(op.amount),
-                    description=op.description or "",
-                    user_id=op.account_id or 0,
-                    username=op.account.username if op.account else "Неизвестный"
-                ) for op in operations
-            ]
-            
-            # Генерируем Excel файл
-            report_path = report_generator.generate_report(report_data_list)
-            
-            # Отправляем файл пользователю
-            with open(report_path, 'rb') as file:
-                await message.answer_document(document=file, caption=f"Отчет за {month} месяцев")
-        
+
     except SQLAlchemyError as e:
-        print(e)
-        await message.answer(text="Произошла ошибка при экспорте данных")
+        print(f"Database error: {e}")
+        await message.answer(text="❌ Ошибка базы данных при экспорте")
     except Exception as e:
-        print(e)
-        await message.answer(text="Произошла ошибка при экспорте данных")
+        print(f"Export error: {e}")
+        await message.answer(text="❌ Произошла ошибка при формировании отчета")
+# async def export(message: Message):
+#     try:
+#         user_id = message.from_user.id
+#         text = message.text.strip()
+#         matched = re.match(r'^(\/export)\s+(\d+)$', text)
+#         if not matched:
+#             await message.answer(text='Неправильный шаблон команды. Пример использования: /export 12')
+#             return
+
+#         command, month = matched.groups()
+#         month = int(month)
+#         await MainBotTg.send_message(text=f'Экспорт данных за {month} мес.', chat_id=message.chat.id)
+        
+#         with DB.get_session() as session:
+#             end_time = datetime.datetime.now()
+#             start_time = end_time - datetime.timedelta(days=30*month)
+
+#             report_generator = ExcelReportGenerator(report_file=f"exel_report_{user_id}.xlsx")
+            
+#             with DB.get_session() as session:
+#                 report_path = report_generator.generate_operations_report(session, user_id, start_time, end_time)
+            
+#             with open(report_path, 'rb') as file:
+#                 file_content = file.read()
+            
+#             input_file = BufferedInputFile(
+#                 file=file_content,
+#                 filename=f"report_{month}_months.xlsx"
+#             )
+#             report_generator.cleanup()
+            
+#             await message.answer_document(document=input_file, caption=f"Отчет за {month} месяцев")
+#     except SQLAlchemyError as e:
+#         print(e)
+#         await message.answer(text="Произошла ошибка при экспорте данных")
+#     except Exception as e:
+#         print(e)
+#         await message.answer(text="Произошла ошибка при экспорте данных")
 
         
 

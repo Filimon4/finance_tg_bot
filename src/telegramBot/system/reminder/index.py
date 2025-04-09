@@ -29,8 +29,8 @@ class ReminderSystem:
     def __init__(self):
         logger.info('-- Start ReminderSystem')
         self._fetch_interval = 60
-        self._setup_scheduler()
-        self._loop = asyncio.new_event_loop()  # Создаем свой event loop
+        # self._setup_scheduler()
+        # self._loop = asyncio.new_event_loop()  # Создаем свой event loop
 
     def _setup_scheduler(self):
         schedule.every(self._fetch_interval).minutes.do(self._startFetching_sync)
@@ -58,4 +58,4 @@ class ReminderSystem:
         except SQLAlchemyError as e:
             print(e)
 
-Reminder = ReminderSystem()
+# Reminder = ReminderSystem()

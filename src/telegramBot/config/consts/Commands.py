@@ -7,5 +7,8 @@ Commands = {
     ),
     BotCommand(
         command=f'/{BotTgCommands.EXPORT.value}', description="Експорт данных за послдение месяцы"
-    )
+    ),
+    BotCommand(
+        command=f'/{BotTgCommands.CHECK_ALL_REMINDERS.value}', description="Експорт данных за послдение месяцы"
+    ),
 }

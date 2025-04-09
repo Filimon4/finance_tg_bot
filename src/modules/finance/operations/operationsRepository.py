@@ -1,3 +1,4 @@
+import datetime
 from fastapi import HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy import and_, extract, func, select, text
@@ -31,16 +32,16 @@ class OperationUpdateDTO(BaseModel):
 class OperationsRepository:
     
     @staticmethod
-    def getPaginatedOperations(session: Session, page: int = 1, limit: int = 40, account_id: int = None):
+    def getPaginatedOperations(session: Session, user_id: int, start_time: datetime, end_time: datetime, page: int = 1, limit: int = 40, ):
         try:
             query = (
                 session
                 .query(Operations)
+                .filter(Operations.account_id == user_id)
+                .filter(Operations.created_at >= start_time)
+                .filter(Operations.created_at <= end_time)
                 .order_by(Operations.created_at)
             )
-
-            if account_id is not None:
-                query = query.filter(Operations.account_id == account_id)
 
             offset = (max(page, 1) - 1) * limit
             operations = query.offset(offset).limit(limit).all()
