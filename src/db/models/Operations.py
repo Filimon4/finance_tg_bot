@@ -1,4 +1,5 @@
 from sqlalchemy import (
+    CheckConstraint,
     Column,
     ForeignKey,
     Integer,
@@ -11,9 +12,8 @@ from sqlalchemy import (
 )
 
 from src.modules.finance.types import OperationType
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, validates
 from ..index import Base
-
 
 class Operations(Base):
     __tablename__ = "operations"
@@ -22,7 +22,7 @@ class Operations(Base):
     name = Column(String(255))
     cash_account_id = Column(Integer, ForeignKey("cash_account.id"), nullable=False)
     to_cash_account_id = Column(Integer, ForeignKey("cash_account.id"), nullable=True)
-    category_id = Column(Integer, ForeignKey("category.id"), nullable=False)
+    category_id = Column(Integer, ForeignKey("category.id"), nullable=True)
     account_id = Column(Integer, ForeignKey("account.id"), nullable=True)
 
     # Relationships
@@ -43,3 +43,21 @@ class Operations(Base):
     description = Column(Text, nullable=True)
     type = Column(Enum(OperationType), nullable=False)
     created_at = Column(TIMESTAMP, default=func.now())
+
+    __table_args__ = (
+        CheckConstraint(
+            '(to_cash_account_id IS NULL AND category_id IS NOT NULL) OR '
+            '(to_cash_account_id IS NOT NULL AND category_id IS NULL)',
+            name='check_account_category_null_logic'
+        ),
+    )
+
+    @validates('to_cash_account_id', 'category_id')
+    def validate_account_and_category(self, key, value):
+        if key == 'to_cash_account_id':
+            if value is None and self.category_id is None:
+                raise ValueError("Если to_cash_account_id не указан, category_id обязателен")
+        elif key == 'category_id':
+            if value is None and self.to_cash_account_id is None:
+                raise ValueError("Если category_id не указан, to_cash_account_id обязателен")
+        return value

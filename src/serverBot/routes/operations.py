@@ -84,8 +84,8 @@ async def createOperation(data: OperationCreateDTO):
                 'id': operation.id,
                 'name': operation.name,
                 'cash_account_id': operation.cash_account_id, 
-                'to_cash_account_id': operation.to_cash_account_id,
-                'category_id': operation.category_id,
+                'to_cash_account_id': operation.to_cash_account_id if operation.to_cash_account_id is not None else None,
+                'category_id': operation.category_id if operation.category_id is not None else None,
                 'amount': float(operation.amount),
                 'description': operation.description,
                 'type': operation.type.name

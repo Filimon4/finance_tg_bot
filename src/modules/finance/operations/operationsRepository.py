@@ -13,7 +13,7 @@ class OperationCreateDTO(BaseModel):
     name: str
     cash_account_id: int
     to_cash_account_id: int | None
-    category_id: int
+    category_id: int | None
     amount: int
     description: str | None
     type: OperationType
