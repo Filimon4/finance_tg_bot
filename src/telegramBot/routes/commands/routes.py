@@ -1,7 +1,5 @@
-import datetime
 import re
 from aiogram import F
-
 from src.modules.excelReportGenerator.index import ExcelReportGenerator
 from src.modules.finance.types import OperationType
 from src.modules.finance.cashAccounts.cashAccountRepository import CashAccountRepository
@@ -12,12 +10,11 @@ from src.modules.accounts.accountsRepository import AccountRepository
 from src.telegramBot import (
     BotDispatcher,
     BotTgCommands,
-    MainBotTg
+    Reminder
 )
 from aiogram.filters import Command
 from aiogram.types import (
     Message,
-    BufferedInputFile
 )
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -59,46 +56,6 @@ async def export(message: Message):
     except Exception as e:
         print(f"Export error: {e}")
         await message.answer(text="❌ Произошла ошибка при формировании отчета")
-# async def export(message: Message):
-#     try:
-#         user_id = message.from_user.id
-#         text = message.text.strip()
-#         matched = re.match(r'^(\/export)\s+(\d+)$', text)
-#         if not matched:
-#             await message.answer(text='Неправильный шаблон команды. Пример использования: /export 12')
-#             return
-
-#         command, month = matched.groups()
-#         month = int(month)
-#         await MainBotTg.send_message(text=f'Экспорт данных за {month} мес.', chat_id=message.chat.id)
-        
-#         with DB.get_session() as session:
-#             end_time = datetime.datetime.now()
-#             start_time = end_time - datetime.timedelta(days=30*month)
-
-#             report_generator = ExcelReportGenerator(report_file=f"exel_report_{user_id}.xlsx")
-            
-#             with DB.get_session() as session:
-#                 report_path = report_generator.generate_operations_report(session, user_id, start_time, end_time)
-            
-#             with open(report_path, 'rb') as file:
-#                 file_content = file.read()
-            
-#             input_file = BufferedInputFile(
-#                 file=file_content,
-#                 filename=f"report_{month}_months.xlsx"
-#             )
-#             report_generator.cleanup()
-            
-#             await message.answer_document(document=input_file, caption=f"Отчет за {month} месяцев")
-#     except SQLAlchemyError as e:
-#         print(e)
-#         await message.answer(text="Произошла ошибка при экспорте данных")
-#     except Exception as e:
-#         print(e)
-#         await message.answer(text="Произошла ошибка при экспорте данных")
-
-        
 
 @BotDispatcher.message(F.text.regexp(r"^[+-]\s*\d+(\.\d+)?"))
 async def inline_operations(message: Message):
@@ -133,8 +90,8 @@ async def inline_operations(message: Message):
 @BotDispatcher.message(Command(commands=BotTgCommands.CHECK_ALL_REMINDERS.value))
 async def send_all_reminders(message: Message):
     try:
-        return
+        Reminder._startFetching_sync()
     except SQLAlchemyError as e:
-        await message.answer(text=f"Ошибка при добавлении операции")
+        await message.answer(text=f"Ошибка при проверке напоминаний")
     except Exception as e:
-        await message.answer(text=f"Ошибка при добавлении операции")
+        await message.answer(text=f"Ошибка при проверке напоминаний")

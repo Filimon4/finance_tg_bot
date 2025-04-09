@@ -18,13 +18,11 @@ class CurrencyAPI:
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(CurrencyAPI, cls).__new__(cls)
-            # Инициализация конфигурации
             cls.exchange_config = API_CONFIG["exchange_rates"]
             cls.crypto_config = API_CONFIG["crypto"]
         return cls._instance
 
     def _make_api_request(self, url, params=None):
-        """Общий метод для выполнения API-запросов"""
         try:
             response = requests.get(url, params=params)
             response.raise_for_status()  # Проверка на ошибки HTTP
@@ -37,7 +35,6 @@ class CurrencyAPI:
             return None
 
     def get_exchange_rates(self, currencies=None):
-        """Получение курсов валют"""
         if currencies is None:
             currencies = self.exchange_config["default_currencies"]
 
@@ -67,7 +64,6 @@ class CurrencyAPI:
         return mass_valuti
 
     def get_crypto_rates(self, limit=10):
-        """Получение курсов криптовалют"""
         data = self._make_api_request(self.crypto_config["url"])
         if not data or "data" not in data:
             return []
