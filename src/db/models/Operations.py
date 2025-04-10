@@ -51,17 +51,7 @@ class Operations(Base):
             name='check_account_category_null_logic'
         ),
         CheckConstraint(
-            'to_cash_account_id IS NULL OR type = "transfer"',
+            'to_cash_account_id IS NULL OR type = \'transfer\'',
             name='check_transfer_type_constraint'
         ),
     )
-
-    @validates('to_cash_account_id', 'category_id')
-    def validate_account_and_category(self, key, value):
-        if key == 'to_cash_account_id':
-            if value is None and self.category_id is None:
-                raise ValueError("Если to_cash_account_id не указан, category_id обязателен")
-        elif key == 'category_id':
-            if value is None and self.to_cash_account_id is None:
-                raise ValueError("Если category_id не указан, to_cash_account_id обязателен")
-        return value

@@ -60,16 +60,22 @@ class OperationsRepository:
     def create( session: Session, data: OperationCreateDTO):
         try:
             print(data)
-            operation = Operations(
-                account_id = data.account_id,
-                name = data.name,
-                cash_account_id = data.cash_account_id,
-                to_cash_account_id = data.to_cash_account_id,
-                category_id = data.category_id,
-                amount = data.amount,
-                description = data.description if data.description else '',
-                type = data.type
-            )
+            if (data.to_cash_account_id and data.category_id) or (not data.to_cash_account_id and not data.category_id):
+                raise Exception("Invalid data: to_cash_account_id and category_id must be mutually exclusive.")
+            if (data.to_cash_account_id != None and data.category_id == None):
+                if (data.type.value != OperationType.TRANSFER.value):
+                    raise Exception("Invalid data: to_cash_account_id must be None if type is not transfer.")
+            operationData = {
+                'account_id': data.account_id,
+                'name': data.name,
+                'cash_account_id': data.cash_account_id,
+                'category_id': data.category_id,
+                'to_cash_account_id': data.to_cash_account_id,
+                'amount': data.amount,
+                'description': data.description if data.description else '',
+                'type': data.type
+            }
+            operation = Operations(**operationData)
             session.add(operation)
             session.commit()
             return operation
