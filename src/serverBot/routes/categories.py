@@ -73,7 +73,7 @@ async def getOverview(tg_id: int = Query(None)):
         )
     
 @app.get("/api/categories/{id}/overview", tags=['Categories'])
-async def getCategoryOverview(id: int, tg_id: str = Query(None)):
+async def getCategoryOverview(id: int, tg_id: int = Query(None)):
     try:
         with DB.get_session() as session:
             categoryOverview = CategoryRepository.getCategoryOverview(session, tg_id, id)

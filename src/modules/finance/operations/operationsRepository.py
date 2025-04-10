@@ -21,7 +21,7 @@ class OperationCreateDTO(BaseModel):
 
 class OperationUpdateDTO(BaseModel):
     oper_id: int
-    name: str
+    name: str | None
     cash_account_id: int | None
     to_cash_account_id: int | None
     category_id: int | None
@@ -146,6 +146,8 @@ class OperationsRepository:
                 operation.description = data.description if data.description is not None else None
             if hasattr(data, 'type'):
                 operation.type = data.type if data.type is not None else None
+            if hasattr(data, 'name'):
+                operation.name = data.name if data.name is not None else None
 
             session.commit()
             return operation
