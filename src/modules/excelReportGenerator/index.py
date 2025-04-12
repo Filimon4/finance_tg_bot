@@ -8,6 +8,8 @@ from sqlalchemy.orm import Session
 from dataclasses import dataclass
 from aiogram.types import Message, BufferedInputFile
 
+from src.telegramBot.bot.BotTg import MainBotTg
+
 @dataclass
 class ReportDTO:
     date: str
@@ -20,7 +22,6 @@ class ExcelReportGenerator:
 
     @staticmethod
     async def generate_and_send_report(
-        message: Message,
         month: int,
         user_id: int,
         session: Session
@@ -48,7 +49,8 @@ class ExcelReportGenerator:
                 with open(report_path, 'rb') as f:
                     file_data = f.read()
                 
-                await message.answer_document(
+                await MainBotTg.send_document(
+                    chat_id=user_id,
                     document=BufferedInputFile(
                         file=file_data,
                         filename=f"financial_report_{month}_months.xlsx"

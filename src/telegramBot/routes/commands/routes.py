@@ -1,3 +1,4 @@
+import json
 import re
 from aiogram import F
 from src.modules.excelReportGenerator.index import ExcelReportGenerator
@@ -15,6 +16,7 @@ from src.telegramBot import (
 from aiogram.filters import Command
 from aiogram.types import (
     Message,
+    WebAppData
 )
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -106,3 +108,12 @@ async def update_all_currency(message: Message):
         await message.answer(text=f"Ошибка при проверке напоминаний")
     except Exception as e:
         await message.answer(text=f"Ошибка при проверке напоминаний")
+
+@BotDispatcher.message(WebAppData)
+async def handle_web_app_data(message: Message):
+    try:
+        data = json.loads(message.web_app_data.data)
+        print(data)
+        await message.answer(f"Получены данные из Mini App: {data}")
+    except Exception as e:
+        await message.answer(f"Ошибка обработки данных: {e}")
