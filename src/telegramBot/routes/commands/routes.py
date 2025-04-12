@@ -39,7 +39,7 @@ async def export(message: Message):
         text = message.text.strip()
         if not user_id or len(text) <= 0:
             raise Exception('Invalid user_id or text')
-        ExcelReportGenerator.on_command_export(user_id, text)
+        await ExcelReportGenerator.on_command_export(user_id, text)
     except Exception as e:
         await message.answer(text="Ошибка при экспорте данных")
 
