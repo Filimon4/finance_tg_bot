@@ -1,98 +1,103 @@
+from typing import Dict, List
 from sqlalchemy.orm import Session
 from sqlalchemy import func, or_
 from decimal import Decimal
 from datetime import datetime
 
-from db.index import DB
-from db.models import Currency, ExchangeRate
-from modules.currency.index import CurrencyAPI
+from src.db.index import DB
+from src.db.models import Currency, ExchangeRate
+from src.modules.currency.index import CurrencyAPI
+from sqlalchemy.exc import SQLAlchemyError
 
 class CurrencyRepository:
     @staticmethod
-    def sync_currency_rates(session: Session):
-        """Основной метод для синхронизации данных из API с базой данных"""
-        api = CurrencyAPI()
-        
-        # Получаем данные из API
-        exchange_rates = api.get_exchange_rates()
-        crypto_rates = api.get_crypto_rates()
-        
-        # Обрабатываем фиатные валюты
-        for rate_str in exchange_rates:
-            parts = rate_str.split()
-            from_currency = parts[0]  # USD
-            rate_value = Decimal(parts[2])
-            to_currency = parts[3]   # EUR, GBP и т.д.
-            
-            # Получаем или создаем валюты в таблице Currency
-            from_currency_obj = CurrencyRepository._get_or_create_currency(
-                session, from_currency, f"{from_currency} Dollar")
-            
-            to_currency_obj = CurrencyRepository._get_or_create_currency(
-                session, to_currency, f"{to_currency} Currency")
-            
-            # Создаем запись в ExchangeRate
-            CurrencyRepository._create_exchange_rate(
-                session, 
-                from_currency_obj.id, 
-                to_currency_obj.id, 
-                rate_value
-            )
-        
-        # Обрабатываем криптовалюты (пример для BTC, ETH и т.д.)
-        for crypto_str in crypto_rates:
-            parts = crypto_str.split()
-            symbol = parts[1][1:-1]  # Получаем символ из (BTC)
-            name = parts[0]          # Bitcoin
-            price = Decimal(parts[2][1:])  # Цена без $
-            
-            # Создаем криптовалюту
-            crypto_obj = CurrencyRepository._get_or_create_currency(
-                session, symbol, name, is_crypto=True)
-            
-            # Для криптовалют сохраняем курс к USD
-            usd_obj = CurrencyRepository._get_or_create_currency(
-                session, "USD", "US Dollar")
-            
-            CurrencyRepository._create_exchange_rate(
-                session, 
-                usd_obj.id, 
-                crypto_obj.id, 
-                price
-            )
-        
-        session.commit()
+    def sync_currency_rates(session: Session, base: str, rates: List[Dict[str, str]]):
+        print('sync_currency_rates: ', rates)
+        try:
+            rateKeys = list(dict(rates).keys())
+            for rateKey in rateKeys:
+                rate = rates[rateKey]
+                code_currency = rate['code']
+                rate_value = rate['value']
+                CurrencyRepository.update_or_create_currency_rate(
+                    session,
+                    base,
+                    code_currency,
+                    rate_value
+                )
+        except SQLAlchemyError as e:
+            print(f"Database SQLAlchemyError: {e}")
+
 
     @staticmethod
-    def _get_or_create_currency(session: Session, code: str, name: str, is_crypto: bool = False) -> Currency:
-        """Вспомогательный метод для получения или создания валюты"""
-        currency = session.query(Currency).filter(
-            or_(
-                Currency.code == code,
-                Currency.name == name
-            )
-        ).first()
+    def get_currency_rate(session, base, to_currency):
+        base_currency = session.query(ExchangeRate).filter(ExchangeRate.code == base).first()
+        to_currency_obj = session.query(ExchangeRate).filter(ExchangeRate.code == to_currency).first()
+
+        if not base_currency or not to_currency_obj:
+            return None
         
+        latest_rate = session.query(ExchangeRate).filter(
+            ExchangeRate.from_currency_id == base_currency.id,
+            ExchangeRate.to_currency_id == to_currency_obj.id
+        ).order_by(ExchangeRate.created_at.desc()).first()
+
+        if latest_rate:
+            return {
+                'rate': float(latest_rate.rate),
+                'updated_at': latest_rate.created_at
+            }
+        return None
+
+    @staticmethod
+    def get_or_create_currency(session: Session, symbol: str, code: str, name: str, symbol_native: str) -> Currency:
+        currency = session.query(Currency).filter(Currency.code == code).first()
         if not currency:
             currency = Currency(
                 code=code,
-                name=f"{name} ({'Crypto' if is_crypto else 'Fiat'})",
+                name=name,
+                symbol=symbol,
+                symbol_native=symbol_native
             )
             session.add(currency)
-            session.flush()
-        
+            session.commit()
         return currency
 
     @staticmethod
-    def _create_exchange_rate(session: Session, from_currency_id: int, to_currency_id: int, rate: Decimal):
-        """Вспомогательный метод для создания записи о курсе"""
-        # Проверяем, есть ли уже такой курс
+    def update_or_create_currency_rate(session: Session, base: str, code: str, rate: Decimal):
+        try:
+            base_currency = session.query(Currency).filter(Currency.symbol == base).first()
+            to_currency = session.query(Currency).filter(Currency.symbol == code).first()
+
+            if not base_currency or not to_currency or base_currency.id == to_currency.id:
+                return
+            
+            existing_rate = session.query(ExchangeRate).filter(
+                ExchangeRate.from_currency_id == base_currency.id,
+                ExchangeRate.to_currency_id == to_currency.id
+            ).order_by(ExchangeRate.created_at.desc()).first()
+        
+            if existing_rate:
+                if existing_rate.rate != rate:
+                    existing_rate.rate = rate
+                    session.commit()
+            else:
+                new_rate = ExchangeRate(
+                    from_currency_id=base_currency.id,
+                    to_currency_id=to_currency.id,
+                    rate=rate
+                )
+                session.add(new_rate)
+        except SQLAlchemyError as e:
+            print(e)
+
+    @staticmethod
+    def create_exchange_rate(session: Session, from_currency_id: int, to_currency_id: int, rate: Decimal):
         existing_rate = session.query(ExchangeRate).filter(
             ExchangeRate.from_currency_id == from_currency_id,
             ExchangeRate.to_currency_id == to_currency_id
         ).order_by(ExchangeRate.created_at.desc()).first()
         
-        # Если курс изменился или его не было - создаем новый
         if not existing_rate or existing_rate.rate != rate:
             new_rate = ExchangeRate(
                 from_currency_id=from_currency_id,
@@ -102,8 +107,20 @@ class CurrencyRepository:
             session.add(new_rate)
 
     @staticmethod
+    def get_currency_rates(session: Session, base_currency_code: str):
+        rates = session.query(ExchangeRate).join(
+            Currency,
+            ExchangeRate.to_currency_id == Currency.id
+        ).filter(Currency.code == base_currency_code).all()
+        return [{
+            'from_currency': rate.from_currency.code,
+            'to_currency': rate.to_currency.code,
+            'rate': float(rate.rate),
+            'updated_at': rate.created_at
+        } for rate in rates]
+
+    @staticmethod
     def get_latest_rates(session: Session, base_currency_code: str = "USD"):
-        """Получение последних курсов для указанной базовой валюты"""
         base_currency = session.query(Currency).filter(
             Currency.code == base_currency_code
         ).first()

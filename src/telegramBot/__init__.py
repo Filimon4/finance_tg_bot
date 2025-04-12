@@ -4,6 +4,7 @@ from .dispatcher.BotDispathcer import BotDispatcher
 from .filters.ReplyKeyboardFilter import ReplyButtonFilter
 from .system.reminder.index import Reminder
 from .system.schedule.index import Schedule
+from .system.currency.index import CurrencySys
 
 __all__ = [
     "MainBotTg",
@@ -13,4 +14,5 @@ __all__ = [
     "ReplyButtonFilter",
     "Schedule",
     "Reminder",
+    "CurrencySys"
 ]

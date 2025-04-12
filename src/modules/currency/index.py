@@ -1,76 +1,83 @@
 import requests
 
 API_CONFIG = {
-    "exchange_rates": {
-        "access_key": "99243e221ad236b1ed453be5b215a5ad",
-        "url": "http://apilayer.net/api/live",
-        "default_currencies": "EUR,GBP,CAD,PLN",
-        "source_currency": "USD"
+    "currencyapi": {
+        "access_key": "cur_live_D0hTJNbg79DzKONmXYXzEwvVb7YaftpRYM6cExQe",
+        "url": "https://api.currencyapi.com/v3",
+        
+        "currencies": "EUR,USD,CHF,RUB,JPY,GBP",
+        
+        "base_currency_header": "base_currency",
+        "currencies_header": "currencies",
+        "api_key_header": "apikey",
+        
+        "api_getall": "/currencies",
+        "api_rates": "/latest",
+        "status": "/status",
     },
-    "crypto": {
-        "url": "https://api.coinlore.net/api/tickers/"
-    }
 }
 
 class CurrencyAPI:
-    _instance = None
-
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super(CurrencyAPI, cls).__new__(cls)
-            cls.exchange_config = API_CONFIG["exchange_rates"]
-            cls.crypto_config = API_CONFIG["crypto"]
-        return cls._instance
+    def __init__(self, config: str):
+        self.config = API_CONFIG[config]
 
     def _make_api_request(self, url, params=None):
         try:
-            response = requests.get(url, params=params)
-            response.raise_for_status()  # Проверка на ошибки HTTP
+            headers = {}
+            headers[self.config["api_key_header"]] = self.config["access_key"]
+            response = requests.get(url, params=params, headers=headers)
+            response.raise_for_status()
             return response.json()
-        except requests.exceptions.RequestException as e:
+        except requests.RequestException as e:
             print(f"Ошибка при выполнении запроса к {url}: {e}")
             return None
-        except ValueError as e:
+        except requests.HTTPError as e:
+            print(f"HTTP ошибка при запросе к {url}: {e}")
+            return None
+        except requests.JSONDecodeError as e:
             print(f"Ошибка при обработке JSON из {url}: {e}")
             return None
+        except requests.Timeout as e:
+            print(f"Таймаут при запросе к {url}: {e}")
+            return None
 
-    def get_exchange_rates(self, currencies=None):
-        if currencies is None:
-            currencies = self.exchange_config["default_currencies"]
+    def get_all(self):
+        currencies = self.config["currencies"]
 
-        params = {
-            "access_key": self.exchange_config["access_key"],
-            "currencies": currencies,
-            "source": self.exchange_config["source_currency"],
-            "format": 1
-        }
+        params = {}
+        params[self.config["currencies_header"]] = currencies
 
-        data = self._make_api_request(self.exchange_config["url"], params)
-        if not data:
+        url = f"{self.config['url']}{self.config['api_getall']}"
+
+        data = self._make_api_request(url, params)
+        if not data or not data['data']:
             return []
 
-        mass_valuti = []
-        if data.get("success"):
-            quotes = data.get("quotes", {})
-            print("Актуальные курсы валют:")
-            for currency_pair, rate in quotes.items():
-                target_currency = currency_pair[3:]
-                mass_valuti.append(f"{self.exchange_config['source_currency']} = {rate} {target_currency}")
-        else:
-            print("Ошибка при получении данных:")
-            print(data.get("error", {}).get("info", "Неизвестная ошибка"))
+        return data['data']
 
-        print(f"ВАЛЮТЫ: {mass_valuti}")
-        return mass_valuti
+    def get_rates(self):
+        url = f"{self.config['url']}{self.config['api_rates']}"
+        all_currencies = self.config["currencies"].split(',')
+        currencies_rates = {}
 
-    def get_crypto_rates(self, limit=10):
-        data = self._make_api_request(self.crypto_config["url"])
-        if not data or "data" not in data:
-            return []
+        for currency in all_currencies:
+            params = {}
+            params[self.config["base_currency_header"]] = currency
+            
+            params[self.config["currencies_header"]] = ",".join(filter(lambda x: x != currency, all_currencies))
+            print(params)
 
-        btc_mass = []
-        for coin in data["data"][:limit]:
-            btc_mass.append(f"{coin['name']} ({coin['symbol']}): ${coin['price_usd']}")
+            rates = self._make_api_request(url, params)
 
-        print(f"КРИПТОВАЛЮТЫ: {btc_mass}")
-        return btc_mass
+            if not rates or not rates['data']:
+                continue
+            currencies_rates[currency] = {
+                'data': rates['data'],
+                'base': currency
+            }
+        return currencies_rates
+    
+    def get_status(self):
+        url = f"{self.config['url']}{self.config['status']}"
+        data = self._make_api_request(url)
+        return data

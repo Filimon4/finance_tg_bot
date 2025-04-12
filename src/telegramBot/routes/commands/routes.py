@@ -18,6 +18,8 @@ from aiogram.types import (
 )
 from sqlalchemy.exc import SQLAlchemyError
 
+from src.telegramBot.system.currency.index import CurrencySys
+
 
 @BotDispatcher.message(Command(commands=BotTgCommands.START.value))
 async def start(message: Message):
@@ -91,6 +93,15 @@ async def inline_operations(message: Message):
 async def send_all_reminders(message: Message):
     try:
         Reminder._startFetching_sync()
+    except SQLAlchemyError as e:
+        await message.answer(text=f"Ошибка при проверке напоминаний")
+    except Exception as e:
+        await message.answer(text=f"Ошибка при проверке напоминаний")
+
+@BotDispatcher.message(Command(commands=BotTgCommands.UPDTATE_CURRENCY.value))
+async def update_all_currency(message: Message):
+    try:
+        CurrencySys.updateAllApi()
     except SQLAlchemyError as e:
         await message.answer(text=f"Ошибка при проверке напоминаний")
     except Exception as e:
