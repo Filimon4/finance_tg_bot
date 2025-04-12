@@ -1,12 +1,15 @@
 from datetime import datetime, timedelta
+import re
 import tempfile
 from openpyxl import Workbook, load_workbook
 from typing import Generator
 import os
+from src.db.index import DB
 from src.modules.finance.operations.operationsRepository import OperationsRepository
 from sqlalchemy.orm import Session
 from dataclasses import dataclass
 from aiogram.types import Message, BufferedInputFile
+from sqlalchemy.exc import SQLAlchemyError
 
 from src.telegramBot.bot.BotTg import MainBotTg
 
@@ -19,6 +22,32 @@ class ReportDTO:
     user_id: int
 
 class ExcelReportGenerator:
+
+    @staticmethod
+    async def on_command_export(user_id: int, text: str):
+        try:
+            matched = re.match(r'^(\/export)\s+(\d+)$', text)
+            if not matched:
+                await MainBotTg.send_message(text='Неправильный шаблон команды. Пример использования: /export 12')
+                return
+
+            _, month = matched.groups()
+            month = int(month)
+            await MainBotTg.send_message(f'🔍 Формирую отчет за {month} месяцев...')
+
+            with DB.get_session() as session:
+                await ExcelReportGenerator.generate_and_send_report(
+                    month=month,
+                    user_id=user_id,
+                    session=session
+                )
+
+        except SQLAlchemyError as e:
+            print(f"Database error: {e}")
+            await MainBotTg.answer(text="❌ Ошибка базы данных при экспорте")
+        except Exception as e:
+            print(f"Export error: {e}")
+            await MainBotTg.answer(text="❌ Произошла ошибка при формировании отчета")
 
     @staticmethod
     async def generate_and_send_report(

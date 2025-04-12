@@ -37,29 +37,11 @@ async def export(message: Message):
     try:
         user_id = message.from_user.id
         text = message.text.strip()
-        matched = re.match(r'^(\/export)\s+(\d+)$', text)
-        if not matched:
-            await message.answer(text='Неправильный шаблон команды. Пример использования: /export 12')
-            return
-
-        _, month = matched.groups()
-        month = int(month)
-        await message.answer(f'🔍 Формирую отчет за {month} месяцев...')
-
-        with DB.get_session() as session:
-            await ExcelReportGenerator.generate_and_send_report(
-                message=message,
-                month=month,
-                user_id=user_id,
-                session=session
-            )
-
-    except SQLAlchemyError as e:
-        print(f"Database error: {e}")
-        await message.answer(text="❌ Ошибка базы данных при экспорте")
+        if not user_id or len(text) <= 0:
+            raise Exception('Invalid user_id or text')
+        ExcelReportGenerator.on_command_export(user_id, text)
     except Exception as e:
-        print(f"Export error: {e}")
-        await message.answer(text="❌ Произошла ошибка при формировании отчета")
+        await message.answer(text="Ошибка при экспорте данных")
 
 @BotDispatcher.message(F.text.regexp(r"^[+-]\s*\d+(\.\d+)?"))
 async def inline_operations(message: Message):
