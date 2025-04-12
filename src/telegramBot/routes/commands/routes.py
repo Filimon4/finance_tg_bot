@@ -76,7 +76,7 @@ async def inline_operations(message: Message):
 @BotDispatcher.message(Command(commands=BotTgCommands.CHECK_ALL_REMINDERS.value))
 async def send_all_reminders(message: Message):
     try:
-        Reminder._startFetching_sync()
+        await Reminder.startFetching()
     except SQLAlchemyError as e:
         await message.answer(text=f"Ошибка при проверке напоминаний")
     except Exception as e:

@@ -44,11 +44,14 @@ class RemindersRepository:
         .query(Reminder)
         .join(Account, Account.id == Reminder.account_id)
         .filter(Reminder.is_active == True)
+        .filter(Reminder.next_time < datetime.now(), Reminder.next_time == None)
         .order_by(Reminder.created_at)
       )
 
       offset = (max(page, 1) - 1) * limit
       reminders = query.offset(offset).limit(limit).all()
+
+      print('-- reminders: ', reminders)
 
       return {
           "reminders": reminders,
@@ -126,8 +129,9 @@ class RemindersRepository:
         reminder.day_of_week = data.day_of_week if not None else None
       if hasattr(data, 'hour'):
         reminder.hour = data.hour if not None else None
-      if hasattr(data, 'is_acitve'):
-        reminder.is_acitve = data.is_acitve if not None else None
+      if hasattr(data, 'is_active'):
+        reminder.is_active = data.is_active
+
 
       session.commit()
 

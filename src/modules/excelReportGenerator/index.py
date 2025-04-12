@@ -28,12 +28,12 @@ class ExcelReportGenerator:
         try:
             matched = re.match(r'^(\/export)\s+(\d+)$', text)
             if not matched:
-                await MainBotTg.send_message(text='Неправильный шаблон команды. Пример использования: /export 12')
+                await MainBotTg.send_message(chat_id=user_id, text='Неправильный шаблон команды. Пример использования: /export 12')
                 return
 
             _, month = matched.groups()
             month = int(month)
-            await MainBotTg.send_message(f'🔍 Формирую отчет за {month} месяцев...')
+            await MainBotTg.send_message(chat_id=user_id, text=f'🔍 Формирую отчет за {month} месяцев...')
 
             with DB.get_session() as session:
                 await ExcelReportGenerator.generate_and_send_report(
