@@ -17,12 +17,17 @@ class CashAccount(Base):
     outgoing_operations = relationship(
         "Operations",
         foreign_keys="[Operations.cash_account_id]",
-        back_populates="cash_account",  # Changed from 'account' to 'cash_account'
+        back_populates="cash_account",
+        cascade="all, delete-orphan",
+        passive_deletes=True
     )
+    
     incoming_operations = relationship(
         "Operations",
         foreign_keys="[Operations.to_cash_account_id]",
         back_populates="to_account",
+        cascade="all, delete-orphan",
+        passive_deletes=True
     )
 
     __table_args__ = (

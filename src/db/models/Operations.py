@@ -20,9 +20,9 @@ class Operations(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255))
-    cash_account_id = Column(Integer, ForeignKey("cash_account.id"), nullable=False)
-    to_cash_account_id = Column(Integer, ForeignKey("cash_account.id"), nullable=True)
-    category_id = Column(Integer, ForeignKey("category.id"), nullable=True)
+    cash_account_id = Column(Integer, ForeignKey("cash_account.id", ondelete="CASCADE"), nullable=False)
+    to_cash_account_id = Column(Integer, ForeignKey("cash_account.id", ondelete="SET NULL"), nullable=True)
+    category_id = Column(Integer, ForeignKey("category.id", ondelete="SET NULL"), nullable=True)
     account_id = Column(Integer, ForeignKey("account.id"), nullable=True)
 
     # Relationships
@@ -47,7 +47,8 @@ class Operations(Base):
     __table_args__ = (
         CheckConstraint(
             '(to_cash_account_id IS NULL AND category_id IS NOT NULL) OR '
-            '(to_cash_account_id IS NOT NULL AND category_id IS NULL)',
+            '(to_cash_account_id IS NOT NULL AND category_id IS NULL) OR '
+            '(to_cash_account_id IS NULL AND category_id IS NULL)',
             name='check_account_category_null_logic'
         ),
         CheckConstraint(

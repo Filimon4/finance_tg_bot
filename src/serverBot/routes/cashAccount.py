@@ -198,6 +198,7 @@ async def deleteCashAccount(data: DeleteCashAccount):
     try:
       with DB.get_session() as session:
         account = session.query(CashAccount).filter(CashAccount.id == data.id).first()
+        print(account)
         if not account:
             raise HTTPException(status_code=404, detail="Cash account not found")
 

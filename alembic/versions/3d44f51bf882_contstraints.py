@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '3d44f51bf882'
+revision: str = '30cd4647d315'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -22,8 +22,10 @@ def upgrade():
         'check_account_category_null_logic',
         'operations',
         '(to_cash_account_id IS NULL AND category_id IS NOT NULL) OR '
-        '(to_cash_account_id IS NOT NULL AND category_id IS NULL)'
+        '(to_cash_account_id IS NOT NULL AND category_id IS NULL) OR '
+        '(to_cash_account_id IS NULL AND category_id IS NULL)'
     )
+
     op.create_check_constraint(
         'check_transfer_type_constraint',
         'operations',
