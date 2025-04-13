@@ -2,8 +2,16 @@ from enum import Enum
 import requests
 
 class CurrencyEnum(Enum):
-    currency_api = 'currency_api',
-    coin_market = 'coin_market'
+    currency_api: str = 'currency_api'
+    coin_market: str = 'coin_market'
+
+    @staticmethod
+    def get_list():
+        return [item.value for item in CurrencyEnum]
+    
+    @staticmethod
+    def get_list_string():
+        return ",".join([item.value for item in CurrencyEnum])
 
 class BaseCurrencyAPI:
     def __init__(self):
@@ -81,54 +89,79 @@ class ThirdCurrencyAPI(BaseCurrencyAPI):
         
     def get_status(self):
         url = f"{self.url}/status"
-        data = self._make_api_request(url)
-        return data
+        data = self._make_api_request(url, {})
+        result = {
+            'active': False
+        }
+        quotas = data.get('quotas', {})
+
+        if not data or not quotas:
+            return result
+        
+        if 'month' in quotas:
+            monthData = quotas['month'] 
+            print(monthData)
+            result['month'] = monthData
+            if monthData['remaining'] > 0:
+                result['active'] = True
+            else:
+                result['active'] = False
+
+        return result
 
 class ThirdCoinMarkerAPI(BaseCurrencyAPI):
-    api_key = "65054a26-7950-4765-9d8c-4bdcb2c1050b",
-    url = "https://pro-api.coinmarketcap.com",
-    base_currencies = ['BTC', 'ETH', 'BNB', 'XRP', 'SOL', 'ADA'],
+    api_key = "65054a26-7950-4765-9d8c-4bdcb2c1050b"
+    url = "https://pro-api.coinmarketcap.com"
+    base_currencies = ['BTC', 'ETH', 'BNB', 'XRP', 'SOL', 'ADA']
+    currencies_ids = {
+        "BTC": 1,
+        "ETH": 1027,
+        "BNB": 1839,
+        "XRP": 52,
+        "SOL": 5426,
+        "ADA": 2010
+    }
 
     def get_rates(self):
         url = f"{self.url}/v2/cryptocurrency/quotes/latest"
         currencies_rates = {}
-
-        for currency in self.base_currencies:
-            params = {
-                'symbol': currency,
-                'convert': ",".join(filter(lambda x: x != currency, self.base_currencies))
-            }
-
-            rates = self._make_api_request(url, params)
-
-            if not rates or not rates.get('data'):
-                continue
-
-            currencies_rates[currency] = {
-                'data': rates['data'][currency]['quote'],
-                'base': currency
+        curr_ids_string = ",".join(list(map(lambda x: str(self.currencies_ids[x]), self.base_currencies)))
+        params = {
+            'id': curr_ids_string
+        }
+        rates = self._make_api_request(url, params)
+        dataKeys = list(rates['data'].keys())
+        for key in dataKeys:
+            curr_data = rates['data'][key]
+            symbol = curr_data['symbol']
+            quote = curr_data['quote']
+            quote_key = list(quote.keys())
+            needed_data = {}
+            for q_key in quote_key:
+                needed_data[q_key] = {
+                    'code': q_key,
+                    'value': float(quote[q_key]['price']),
+                }
+            currencies_rates[symbol] = {
+                'data': needed_data,
+                'base': symbol
             }
         return currencies_rates
 
     def get_all(self):
-        url = f"{self.url}/v1/cryptocurrency/map"
-        
+        curr_ids_string = ",".join(list(map(lambda x: str(self.currencies_ids[x]), self.base_currencies)))
+        url = f"{self.url}/v2/cryptocurrency/info"
         params = {
-            'listing_status': 'active',
-            'limit': 3500,  # Максимальное количество по API
-            'symbol': ','.join(self.base_currencies)
+            'id': curr_ids_string
         }
-
         data = self._make_api_request(url, params)
         if not data or not data.get('data'):
             return []
-
         return data['data']
 
     def _make_api_request(self, url, params):
         if params is None:
             params = {}
-            
         try:
             headers = {
                 'Accepts': 'application/json',
@@ -152,39 +185,54 @@ class ThirdCoinMarkerAPI(BaseCurrencyAPI):
         
     def get_status(self):
         url = f"{self.url}/v1/key/info"
-        data = self._make_api_request(url)
+        data = self._make_api_request(url, {})
         
-        print(data)
-        if not data:
-            return {
-                'status': 'error',
-                'message': 'Unable to connect to CoinMarketCap API'
-            }
-        
-        return {
-            'status': 'success',
-            'plan': data.get('data', {}).get('plan', {}),
-            'usage': data.get('data', {}).get('usage', {}),
-            'timestamp': data.get('status', {}).get('timestamp')
+        result = {
+            'active': False
         }
+
+        if not data:
+            return result
+
+        if 'status' in data:
+            result['timestamp'] = data.get('status', {}).get('timestamp')
+
+        if 'plan' in data.get('data', {}):
+            result['plan'] = data['data']['plan']
+        
+        if 'usage' in data.get('data', {}):
+            result['usage'] = data['data']['usage']
+            
+            credits_left = data['data']['usage'].get('current_month', {}).get('credits_left')
+            if credits_left is not None and credits_left <= 0:
+                result['active'] = False
+            else:
+                result['active'] = True
+        
+        return result
 
 class CurrencyStrategies(BaseCurrencyAPI):
     def __init__(self):
         super().__init__()
         objectPool = dict()
-        objectPool[CurrencyEnum.currency_api] = ThirdCurrencyAPI()
-        objectPool[CurrencyEnum.coin_market] = ThirdCoinMarkerAPI()
+        objectPool[CurrencyEnum.currency_api.value] = ThirdCurrencyAPI()
+        objectPool[CurrencyEnum.coin_market.value] = ThirdCoinMarkerAPI()
 
         self.objectPool = objectPool
 
     def get_all(self, type: CurrencyEnum):
-        pass
+        if not self.objectPool[type]:
+            raise ValueError(f"Invalid currency type: {type}")
+        return self.objectPool[type].get_all()
     
     def get_rates(self, type: CurrencyEnum):
-        pass
+        if not self.objectPool[type]:
+            raise ValueError(f"Invalid currency type: {type}")
+        return self.objectPool[type].get_rates()
     
     def get_status(self, type: CurrencyEnum):
-        pass
-    
+        if not self.objectPool[type]:
+            raise ValueError(f"Invalid currency type: {type}")
+        return self.objectPool[type].get_status()
 
 CurrencyManager = CurrencyStrategies()

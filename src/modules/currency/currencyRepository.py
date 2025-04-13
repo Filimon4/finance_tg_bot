@@ -1,18 +1,14 @@
 from typing import Dict, List
 from sqlalchemy.orm import Session
-from sqlalchemy import func, or_
+from sqlalchemy import func
 from decimal import Decimal
-from datetime import datetime
 
-from src.db.index import DB
 from src.db.models import Currency, ExchangeRate
-from src.modules.currency.index import CurrencyAPI
 from sqlalchemy.exc import SQLAlchemyError
 
 class CurrencyRepository:
     @staticmethod
     def sync_currency_rates(session: Session, base: str, rates: List[Dict[str, str]]):
-        print('sync_currency_rates: ', rates)
         try:
             rateKeys = list(dict(rates).keys())
             for rateKey in rateKeys:

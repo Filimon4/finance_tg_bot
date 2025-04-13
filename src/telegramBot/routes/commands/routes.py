@@ -1,6 +1,7 @@
 import json
 import re
 from aiogram import F
+from src.modules.currency.index import CurrencyEnum
 from src.modules.excelReportGenerator.index import ExcelReportGenerator
 from src.modules.finance.types import OperationType
 from src.modules.finance.cashAccounts.cashAccountRepository import CashAccountRepository
@@ -82,7 +83,7 @@ async def send_all_reminders(message: Message):
     except Exception as e:
         await message.answer(text=f"Ошибка при проверке напоминаний")
 
-@BotDispatcher.message(Command(commands=BotTgCommands.UPDTATE_CURRENCY.value))
+@BotDispatcher.message(Command(commands=BotTgCommands.UPDTATE_ALL_CURRENCY.value))
 async def update_all_currency(message: Message):
     try:
         CurrencySys.updateAllApi()
@@ -91,11 +92,70 @@ async def update_all_currency(message: Message):
     except Exception as e:
         await message.answer(text=f"Ошибка при проверке напоминаний")
 
-@BotDispatcher.message(WebAppData)
-async def handle_web_app_data(message: Message):
+@BotDispatcher.message(Command(commands=BotTgCommands.UPDTATE_CURRENCY.value))
+async def update_currency(message: Message):
     try:
-        data = json.loads(message.web_app_data.data)
-        print(data)
-        await message.answer(f"Получены данные из Mini App: {data}")
+        text = message.text.strip()
+        api_type = text.split(" ")[1]
+        print('api_type: ', api_type)
+        if not api_type or len(api_type) <= 0:
+            await message.answer(text="Не указан api_type")
+            return
+        CurrencySys.updateApiCurrencies(api_type)
+        await message.answer(text=f"Обновление валюты {api_type} завершено")
+    except SQLAlchemyError as e:
+        print(e)
+        await message.answer(text=f"Ошибка при проверке напоминаний")
     except Exception as e:
-        await message.answer(f"Ошибка обработки данных: {e}")
+        print(e)
+        await message.answer(text=f"Ошибка при проверке напоминаний")
+
+@BotDispatcher.message(Command(commands=BotTgCommands.UPDATE_CURRENCY_RATES.value))
+async def update_currency_rates(message: Message):
+    try:
+        text = message.text.strip()
+        api_type = text.split(" ")[1]
+        if not api_type or len(api_type) <= 0:
+            await message.answer(text="Не указан api_type")
+            return
+        CurrencySys.updateApiRates(api_type)
+        await message.answer(text=f"Курсы валют {api_type} обновлены")
+    except SQLAlchemyError as e:
+        print(e)
+        await message.answer(text=f"Ошибка при проверке напоминаний")
+    except Exception as e:
+        print(e)
+        await message.answer(text=f"Ошибка при проверке напоминаний")
+
+@BotDispatcher.message(Command(commands=BotTgCommands.ALL_THIRD_APIS.value))
+async def send_all_apies(message: Message):
+    try:
+        text = "\n".join(CurrencyEnum.get_list())
+        await message.answer(text=f"Список всех API: \n{text}")
+    except SQLAlchemyError as e:
+        print(e)
+        await message.answer(text=f"Ошибка при проверке напоминаний")
+    except Exception as e:
+        print(e)
+        await message.answer(text=f"Ошибка при проверке напоминаний")
+
+@BotDispatcher.message(Command(commands=BotTgCommands.API_STATUS.value))
+async def send_api_status(message: Message):
+    try:
+        text = message.text.strip()
+        api_type = text.split(" ")[1]
+        if not api_type or len(api_type) <= 0:
+            await message.answer(text="Не указан api_type")
+            return
+        text = CurrencySys.getApiStatus(api_type)
+        print(text)
+        await message.answer(text=f"Список всех API: \n{text}")
+    except SQLAlchemyError as e:
+        print(e)
+        await message.answer(text=f"Ошибка при проверке напоминаний")
+    except Exception as e:
+        print(e)
+        await message.answer(text=f"Ошибка при проверке напоминаний")
+
+
+

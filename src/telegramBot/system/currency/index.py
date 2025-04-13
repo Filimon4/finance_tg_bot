@@ -1,16 +1,14 @@
 import asyncio
 import schedule
+from src.modules.currency.index import CurrencyEnum, CurrencyManager
 from src.modules.currency.currencyRepository import CurrencyRepository
 from src.db.index import DB
-from src.modules.currency.index import CurrencyAPI
 from sqlalchemy.exc import SQLAlchemyError
 
 class CurrencySystem:
-    api = [CurrencyAPI('currencyapi')]
-
     def __init__(self):
       self._loop = asyncio.new_event_loop()
-      self._fetch_interval = 1
+      self._fetch_interval = 7
       self._setup_scheduler()
 
     def _setup_scheduler(self):
@@ -25,35 +23,42 @@ class CurrencySystem:
       self.updateRates()
 
     def updateRates(self):
-      with DB.get_session() as session:
-        for api in self.api:
-          apiRates = api.get_rates()
-          apiRatesKeys = list(dict(apiRates).keys())
-          for currency in apiRatesKeys:
-            try:
-              data = apiRates[currency]
-              base = data['base']
-              rates = data['data']
-              CurrencyRepository.sync_currency_rates(session, base, rates)
-            except SQLAlchemyError as e:
-              print(e)
-        session.commit()
+      for api in CurrencyEnum.get_list():
+        self.updateApiRates(api)
 
     def updateCurrencies(self):
+      for api in CurrencyEnum.get_list():
+        self.updateApiCurrencies(api)
+
+    def getApiStatus(self, api):
+      return CurrencyManager.get_status(api)
+
+    def updateApiCurrencies(self, api):
       with DB.get_session() as session:
-        for api in self.api:
-          apiCurrencies = api.get_all()
-          currenciesKeys = list(dict(apiCurrencies).keys())
-          for currency in currenciesKeys:
-            try:
-              data = apiCurrencies[currency]
-              code = data['code']
-              name = data['name']
-              symbol = data['symbol']
-              symbol_native = data['symbol_native']
-              CurrencyRepository.get_or_create_currency(session, code, name, symbol, symbol_native)
-            except SQLAlchemyError as e:
-              print(e)
+        apiCurrencies = CurrencyManager.get_all(api)
+        currenciesKeys = list(dict(apiCurrencies).keys())
+        for currency in currenciesKeys:
+          try:
+            data = apiCurrencies[currency]
+            symbol = data['symbol']
+            name = data['name']
+            CurrencyRepository.get_or_create_currency(session, symbol, name, name, symbol)
+          except SQLAlchemyError as e:
+            print(e)
+        session.commit()
+
+    def updateApiRates(self, api):
+      with DB.get_session() as session:
+        apiRates = CurrencyManager.get_rates(api)
+        apiRatesKeys = list(dict(apiRates).keys())
+        for currency in apiRatesKeys:
+          try:
+            data = apiRates[currency]
+            base = data['base']
+            rates = data['data']
+            CurrencyRepository.sync_currency_rates(session, base, rates)
+          except SQLAlchemyError as e:
+            print(e)
         session.commit()
     
 CurrencySys = CurrencySystem()
