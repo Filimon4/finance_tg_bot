@@ -1,6 +1,8 @@
 import asyncio
 from asyncio.log import logger
+import logging
 import random
+from typing import Optional
 import schedule
 
 from src.telegramBot import MainBotTg
@@ -28,19 +30,27 @@ class ReminderSystem:
 
     def __init__(self):
         logger.info('-- Start ReminderSystem')
-        self._fetch_interval = 60
+        self._fetch_interval = 3600
         self._loop = asyncio.new_event_loop()
-        self._setup_scheduler()
+        self._task: Optional[asyncio.Task] = None
+        self._stop_event = asyncio.Event()
 
     def _setup_scheduler(self):
-        schedule.every(self._fetch_interval).minutes.do(self._startFetching_sync)
+        # schedule.every(self._fetch_interval).seconds.do(self._startFetching_sync)
+        if not self._task or self._task.done():
+            self._task = asyncio.create_task(self._run_periodically())
 
-    def _startFetching_sync(self):
-        asyncio.set_event_loop(self._loop)
-        self._loop.run_until_complete(self.startFetching())
+    async def _run_periodically(self):
+        while not self._stop_event.is_set():
+            try:
+                await self.startFetching()  # Ваш метод для обработки напоминаний
+            except Exception as e:
+                logging.error(f"ReminderSystem error: {e}")
+            await asyncio.sleep(self._fetch_interval)
 
     async def sendReminder(self, reminder) -> bool:
         try:
+            print('-- ReminderSystem: sendReminder, reminder:', reminder.id, reminder.account.id)
             user_id = reminder.account.id
             reminder_messages = [
                 "🔔 Напоминание: Не забудь внести последние расходы! Финансы любят порядок.",
@@ -54,6 +64,7 @@ class ReminderSystem:
             ]
             
             random_message = random.choice(reminder_messages)
+            print(random_message)
             await MainBotTg.send_message(text=random_message, chat_id=user_id)
             return True
         except Exception as e:
@@ -65,6 +76,8 @@ class ReminderSystem:
                 for reminders in self.paginatedRemindersGenerator(session):
                     for reminder in reminders:
                         await self.sendReminder(reminder)
+        except Exception as e:
+            print(e)
         except SQLAlchemyError as e:
             print(e)
 

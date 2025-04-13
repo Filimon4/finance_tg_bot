@@ -28,4 +28,4 @@ class ScheduleSystem:
         if self._thread is not None:
             self._thread.join()
 
-Schedule = ScheduleSystem()
+# Schedule = ScheduleSystem()

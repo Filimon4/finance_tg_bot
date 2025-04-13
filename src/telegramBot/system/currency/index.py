@@ -1,24 +1,34 @@
 import asyncio
+import logging
+from typing import Optional
 import schedule
 from src.modules.currency.index import CurrencyEnum, CurrencyManager
 from src.modules.currency.currencyRepository import CurrencyRepository
 from src.db.index import DB
 from sqlalchemy.exc import SQLAlchemyError
+from asyncio.log import logger
 
 class CurrencySystem:
     def __init__(self):
       self._loop = asyncio.new_event_loop()
-      self._fetch_interval = 7
-      self._setup_scheduler()
+      self._fetch_interval = 604800
+      self._task: Optional[asyncio.Task] = None
+      self._stop_event = asyncio.Event()
 
     def _setup_scheduler(self):
-      schedule.every(self._fetch_interval).days.do(self._startFetching_sync)
+      if not self._task or self._task.done():
+            self._task = asyncio.create_task(self._run_periodically())
 
-    def _startFetching_sync(self):
-      asyncio.set_event_loop(self._loop)
-      self._loop.run_until_complete(self.updateAllApi())
+    async def _run_periodically(self):
+      while not self._stop_event.is_set():
+          try:
+              await self.updateAllApi()  # Ваш метод для обработки напоминаний
+          except Exception as e:
+              logging.error(f"ReminderSystem error: {e}")
+          await asyncio.sleep(self._fetch_interval)
 
     def updateAllApi(self):
+      logger.info('-- CurrencySystem: updateAllApi')
       self.updateCurrencies()
       self.updateRates()
 

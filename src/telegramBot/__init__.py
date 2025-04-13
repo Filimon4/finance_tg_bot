@@ -3,7 +3,6 @@ from .bot.BotTg import MainBotTg
 from .dispatcher.BotDispathcer import BotDispatcher
 from .filters.ReplyKeyboardFilter import ReplyButtonFilter
 from .system.reminder.index import Reminder
-from .system.schedule.index import Schedule
 from .system.currency.index import CurrencySys
 
 __all__ = [
@@ -12,7 +11,6 @@ __all__ = [
     "BotTgCommands",
     "KeyboardButtons",
     "ReplyButtonFilter",
-    "Schedule",
     "Reminder",
     "CurrencySys"
 ]
