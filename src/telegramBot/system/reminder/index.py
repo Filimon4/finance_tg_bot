@@ -19,8 +19,7 @@ class ReminderSystem:
                 break
 
             for reminder in data_reminders['reminders']:
-                if reminder.next_time is None:
-                    reminder.next_time = RemindersRepository.calculateNextTime(reminder.day_of_week, reminder.hour)
+                reminder.next_time = RemindersRepository.calculateNextTime(reminder.day_of_week, reminder.hour)
             
             session.commit()
             yield data_reminders['reminders']
@@ -30,7 +29,7 @@ class ReminderSystem:
     def __init__(self):
         logger.info('-- Start ReminderSystem')
         self._fetch_interval = 60
-        self._loop = asyncio.new_event_loop()  # Создаем свой event loop
+        self._loop = asyncio.new_event_loop()
         self._setup_scheduler()
 
     def _setup_scheduler(self):

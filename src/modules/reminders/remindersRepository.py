@@ -44,7 +44,7 @@ class RemindersRepository:
         .query(Reminder)
         .join(Account, Account.id == Reminder.account_id)
         .filter(Reminder.is_active == True)
-        .filter(Reminder.next_time < datetime.now(), Reminder.next_time == None)
+        .filter(Reminder.next_time < datetime.now())
         .order_by(Reminder.created_at)
       )
 
@@ -96,16 +96,19 @@ class RemindersRepository:
   @staticmethod
   def create(session: Session, data: ReminderCreateDTO):
     try:
+      next_time = RemindersRepository.calculateNextTime(data.day_of_week, int(data.hour))
       reminder = Reminder(
         account_id = data.account_id,
         day_of_week = data.day_of_week,
         hour = data.hour,
         is_active = data.is_active,
+        next_time = next_time,
       )
       session.add(reminder)
       session.commit()
       return reminder
     except Exception as e:
+      print('-- create reminder error: ', e)
       raise Exception(e)
 
   @staticmethod

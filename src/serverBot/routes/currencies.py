@@ -14,6 +14,8 @@ async def getAll():
           "id": cur.id,
           "code": cur.code,
           "name": cur.name,
+          "symbol": cur.symbol,
+          "symbol_native": cur.symbol_native,
           "created_at": str(cur.created_at),
         }
         for cur in allCurrencies

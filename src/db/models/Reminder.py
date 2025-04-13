@@ -37,7 +37,7 @@ class Reminder(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     day_of_week = Column(Enum(DayOfWeek), nullable=False)
     hour = Column(Integer, nullable=False, server_default="0", default=0)
-    next_time = Column(TIMESTAMP, nullable=True)
+    next_time = Column(TIMESTAMP, nullable=False)
     is_active = Column(Boolean, default=False)
     created_at = Column(TIMESTAMP, default=func.now())
     account_id = Column(Integer, ForeignKey("account.id"))

@@ -45,7 +45,6 @@ async def getOverview(tg_id: int = Query(None)):
             total_overview = []
 
             for cat in allCategories: 
-                print(cat.id, cat.account_id, cat.name)
                 cat_overview = CategoryRepository.getCategoryOverview(session, tg_id, cat.id)
 
                 total_income = float(cat_overview["total_income"])

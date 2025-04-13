@@ -78,6 +78,7 @@ async def getCashAccountsOverview(tg_id: int = Query(None)):
         for acc in accounts:
             accountData = CashAccountRepository.getCashAccountOverview(session, acc.id)
             accountsOverview.append({
+                "id": acc.id,
                 "account_id": accountData['account'].id,
                 "account_name": accountData['account'].name,
                 "total_income": float(accountData['total_income']),

@@ -11,7 +11,7 @@ from src.modules.finance.types import OperationType
 
 class OperationCreateDTO(BaseModel):
     account_id: int
-    name: str
+    name: str | None
     cash_account_id: int
     to_cash_account_id: int | None
     category_id: int | None
@@ -67,7 +67,7 @@ class OperationsRepository:
                     raise Exception("Invalid data: to_cash_account_id must be None if type is not transfer.")
             operationData = {
                 'account_id': data.account_id,
-                'name': data.name,
+                'name': data.name if data.name is not None else '',
                 'cash_account_id': data.cash_account_id,
                 'category_id': data.category_id,
                 'to_cash_account_id': data.to_cash_account_id,

@@ -86,7 +86,7 @@ def getById(id: int = Query(None)):
     )
 
 @app.post('/api/reminders', tags=['Reminders'])
-def createNotify(data: ReminderCreateDTO):
+def createReminder(data: ReminderCreateDTO):
   try:
     with DB.get_session() as session:
       newReminder = RemindersRepository.create(session, data)
@@ -104,13 +104,14 @@ def createNotify(data: ReminderCreateDTO):
         content={"success": True, "reminder": reminderData}
       )
   except Exception as e:
+    print(e)
     return JSONResponse(
         status_code=500,
         content={"success": False, "error": str(e)}
     )
 
 @app.patch('/api/reminders', tags=['Reminders'])
-def updateNotify(data: ReminderUpdateDTO):
+def updateReminder(data: ReminderUpdateDTO):
   try:
     with DB.get_session() as session:
       reminders = RemindersRepository.update(session, data)
@@ -135,11 +136,13 @@ def updateNotify(data: ReminderUpdateDTO):
         status_code=500,
         content={"success": False, "error": str(e)}
     )
+  
 @app.delete('/api/reminders', tags=['Reminders'])
-def deleteNotify(data: ReminderDeleteData):
+def deleteReminder(id: int = Query(None)):
   try:
+    print('/api/reminders ',id)
     with DB.get_session() as session:
-      deleted = RemindersRepository.delete(session, data.id)
+      deleted = RemindersRepository.delete(session, id)
       if not deleted: raise Exception('Failed to delete')
       return JSONResponse(
         status_code=200,
