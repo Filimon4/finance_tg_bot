@@ -50,7 +50,7 @@ async def inline_operations(message: Message):
         with DB.get_session() as session:
             sign, amount, category = message.text.split(" ")[0:3]
             user = AccountRepository.getUserById(session, userid)
-            category = CategoryRepository.getByName(session, user.id, category)
+            category = CategoryRepository.getByName(session, category)
             cashAccount = CashAccountRepository.getMain(session, user.id)
 
             data = OperationCreateDTO(

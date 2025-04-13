@@ -11,7 +11,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["DELETE", "GET", "POST", "PUT", "PATCH"],
     allow_headers=["*"],
 )
 
@@ -22,6 +22,6 @@ from .routes.cashAccount import *
 from .routes.account import *
 from .routes.currencies import *
 
-@app.get('/api/status')
+@app.get('/api/status', tags=['info'])
 def getApiHealth():
   return "Ok"

@@ -2,7 +2,7 @@ from fastapi import Query
 from fastapi.responses import JSONResponse
 from src.db.models import Category
 from src.db.index import DB
-from src.modules.finance.categories.catogoriesRepository import CategoryCreateDTO, CategoryRepository, CategoryUpdateDTO
+from src.modules.finance.categories.catogoriesRepository import CategoryCreateDTO, CategoryDeleteDTO, CategoryRepository, CategoryUpdateDTO
 from src.modules.finance.operations.operationsRepository import OperationsRepository
 
 from ..index import app
@@ -89,7 +89,32 @@ async def getCategoryOverview(id: int, tg_id: int = Query(None)):
             content={"success": False, "error": str(e)}
         )
     
-@app.post("/api/categories/create", tags=['Categories'])
+@app.get("/api/categories/{id}", tags=['Categories'])
+async def getCategoryOverview(id: int):
+    try:
+        with DB.get_session() as session:
+            category = CategoryRepository.get(session, id)
+
+            categoryJson = {
+                'id': int(category.id),
+                'name': str(category.name),
+                'base_type': category.base_type.name if category.base_type else 'none',
+                'created_at': str(category.created_at),
+                'account_id': int(category.id),
+            }
+
+            return JSONResponse(
+                status_code=200,
+                content={"success": True, "category": categoryJson},
+            )
+    except Exception as e:
+        print(e)
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": str(e)}
+        )
+    
+@app.post("/api/categories", tags=['Categories'])
 async def createCategory(data: CategoryCreateDTO):
     try:
         with DB.get_session() as session:
@@ -111,12 +136,11 @@ async def createCategory(data: CategoryCreateDTO):
         )
 
 
-@app.patch("/api/categories/update", tags=['Categories'])
+@app.patch("/api/categories", tags=['Categories'])
 async def updateCategory(data: CategoryUpdateDTO):
     try:
         with DB.get_session() as session:
             updatedCategory = CategoryRepository.update(session, data)
-            print(updatedCategory.base_type.name)
             categoryData = {
                 'category_id': updatedCategory.id,
                 'name': updatedCategory.name,
@@ -125,8 +149,8 @@ async def updateCategory(data: CategoryUpdateDTO):
             }
             print(categoryData)
             return JSONResponse(
-                status_code=500,
-                content={"success": False, "category": categoryData}
+                status_code=200,
+                content={"success": True, "category": categoryData}
             )
     except Exception as e:
         print(e)
@@ -135,13 +159,13 @@ async def updateCategory(data: CategoryUpdateDTO):
             content={"success": False, "error": str(e)}
         )
 
-@app.delete("/api/categories/delete", tags=['Categories'])
-async def delete(cat_id: str = Query(None)):
+@app.delete("/api/categories", tags=['Categories'])
+async def delete(data: CategoryDeleteDTO):
     try:
         with DB.get_session() as session:
-            deleted = CategoryRepository.delete(session, cat_id)
+            deleted = CategoryRepository.delete(session, data.id)
             if not deleted:
-                raise Exception(f'Failed to delete {cat_id}')
+                raise Exception(f'Failed to delete {data.id}')
             return JSONResponse(
                 status_code=200,
                 content={"success": True}

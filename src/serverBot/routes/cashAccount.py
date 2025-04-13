@@ -2,7 +2,7 @@ from fastapi import HTTPException, Query
 from fastapi.responses import JSONResponse
 from sqlalchemy import Result, Select, func, select
 from src.modules.finance.types import OperationType
-from src.modules.finance.cashAccounts.cashAccountRepository import CashAccountCreate, CashAccountRepository
+from src.modules.finance.cashAccounts.cashAccountRepository import CashAccountCreate, CashAccountRepository, DeleteCashAccount, UpdateCashAccount
 from src.db.models.CashAccount import CashAccount
 from src.db.models.Operations import Operations
 from src.db.index import DB
@@ -37,7 +37,7 @@ async def getCashAccounts(tg_id: int = Query(None), page: int = 0, limit: int = 
         )
             
 
-@app.get("/api/cash_accounts/one", tags=['Cash Account'], description='Получить кассовый счет по ID')
+@app.get("/api/cash_accounts/{id}", tags=['Cash Account'], description='Получить кассовый счет по ID')
 async def getCashAccount(id: int):
     try:
         with DB.get_session() as session:
@@ -50,16 +50,20 @@ async def getCashAccount(id: int):
                 content={
                     "success": True,
                     "account": {
-                        "id": account.id,
-                        "name": account.name,
-                        "created_at": account.created_at,
-                        "account_id": account.account_id,
-                        "currency_id": account.currency_id,
+                        "id": int(account.id),
+                        "name": str(account.name),
+                        "created_at": str(account.created_at),
+                        "account_id": int(account.account_id),
+                        "currency_id": int(account.currency_id),
                     }
                 }
             )
     except HTTPException:
-        raise  # Пробрасываем HTTPException как есть (для 404)
+        print(f"Error in get_cash_account: {e}")
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": str(e)}
+        )
     except Exception as e:
         print(f"Error in get_cash_account: {e}")
         return JSONResponse(
@@ -68,8 +72,8 @@ async def getCashAccount(id: int):
         )
 
 
-@app.get("/api/cash_accounts/overview", tags=['Cash Account'], description='Получить сводку по всем счетам')
-async def getCashAccountsOverview(tg_id: int = Query(None)):
+@app.get("/api/cash_accounts/{tg_id}/overview", tags=['Cash Account'], description='Получить сводку по всем счетам')
+async def getCashAccountsOverview(tg_id: int):
     try:
       with DB.get_session() as session:
         accounts = CashAccountRepository.getAll(session, tg_id)
@@ -90,6 +94,12 @@ async def getCashAccountsOverview(tg_id: int = Query(None)):
             status_code=200,
             content={"accounts_overview": accountsOverview},
         )
+    except HTTPException as e:
+       print(e)
+       return JSONResponse(
+          status_code=500,
+          content={"success": False, "error": str(e)}
+      )
     except Exception as e:
       print(f"Error in get_cash_account: {e}")
       return JSONResponse(
@@ -126,7 +136,7 @@ async def getSingleCashAccountOverview(id: int):
       )
 
 
-@app.post("/api/cash_accounts/create", tags=['Cash Account'], description='Создать новый кассовый счет')
+@app.post("/api/cash_accounts", tags=['Cash Account'], description='Создать новый кассовый счет')
 async def createCashAccount(account_data: CashAccountCreate):
     try:
       with DB.get_session() as session:
@@ -153,16 +163,46 @@ async def createCashAccount(account_data: CashAccountCreate):
           status_code=500,
           content={"success": False, "error": str(e)}
       )
+    
 
-@app.delete("/api/cash_accounts/delete/{id}", tags=['Cash Account'], description='Удалить кассовый счет')
-async def delete_cash_account(id: int):
+@app.patch("/api/cash_accounts", tags=['Cash Account'], description='Обновить кассовый счет')
+async def updateCashAccount(account_data: UpdateCashAccount):
     try:
       with DB.get_session() as session:
-        account = session.query(CashAccount).filter(CashAccount.id == id).first()
+        account = session.query(CashAccount).filter(CashAccount.id == account_data.id).first()
+        if not account:
+            raise HTTPException(status_code=404, detail="Cash account not found")
+
+        account.name = account_data.name
+        session.commit()
+
+        return JSONResponse(
+          status_code=200,
+          content={"success": True, "account": {
+                    "id": int(account.id),
+                    "name": str(account.name),
+                    "account_id": int(account.account_id),
+                    "currency_id": int(account.currency_id),
+                    "created_at": str(account.created_at),
+                }}
+        )
+    except Exception as e:
+      print(f"Error in get_cash_account: {e}")
+      return JSONResponse(
+          status_code=500,
+          content={"success": False, "error": str(e)}
+      )
+
+@app.delete("/api/cash_accounts", tags=['Cash Account'], description='Удалить кассовый счет')
+async def deleteCashAccount(data: DeleteCashAccount):
+    try:
+      with DB.get_session() as session:
+        account = session.query(CashAccount).filter(CashAccount.id == data.id).first()
         if not account:
             raise HTTPException(status_code=404, detail="Cash account not found")
 
         session.delete(account)
+        session.commit()
         return JSONResponse(
           status_code=200,
           content={"success": True, "message": "Cash account deleted successfully"}

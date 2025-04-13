@@ -15,10 +15,12 @@ class CategoryCreateDTO(BaseModel):
     account_id: int
 
 class CategoryUpdateDTO(BaseModel):
-    category_id: int
+    id: int
     name: str
     base_type: TransactionType
-    account_id: int
+
+class CategoryDeleteDTO(BaseModel):
+    id: int
 
 class CategoryRepository:
     @staticmethod
@@ -41,15 +43,15 @@ class CategoryRepository:
             return None
 
     @staticmethod
-    def get(session: Session, tg_id: int, category_id: int):
+    def get(session: Session, category_id: int):
         try:
-            return session.query(Category).filter(Category.id == category_id, Category.account_id == tg_id).first()
+            return session.query(Category).filter(Category.id == category_id).first()
         except SQLAlchemyError as e:
             print(f"Ошибка при получении категории: {e}")
             return None
         
     @staticmethod
-    def getByName(session: Session, tg_id: int, name: str):
+    def getByName(session: Session, name: str):
         try:
             return session.query(Category).filter(Category.name == name).first()
         except SQLAlchemyError as e:
@@ -67,8 +69,7 @@ class CategoryRepository:
     def update(session: Session, data: CategoryUpdateDTO):
         try:
             category = session.query(Category).filter(
-                Category.id == data.category_id,
-                Category.account_id == data.account_id
+                Category.id == data.id,
             ).first()
 
             if not category:
@@ -107,15 +108,18 @@ class CategoryRepository:
             if not category: raise Exception('There is not category')
             session.delete(category)
             session.commit()
+            return True
         except Exception as e:
-            return None
+            print(e)
+            return False
         except SQLAlchemyError as e:
-            return None
+            print(e)
+            return False
         
     @staticmethod
     def getCategoryOverview(session: Session, tg_id: int, category_id: int):
         try:
-            category = CategoryRepository.get(session, tg_id, category_id)
+            category = CategoryRepository.get(session, category_id)
             if not category:
                 raise Exception("Категория не найдена")
             

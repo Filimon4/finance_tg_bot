@@ -14,6 +14,13 @@ class CashAccountCreate(BaseModel):
     name: str
     account_id: int
     currency_id: int
+
+class UpdateCashAccount(BaseModel):
+    id: int
+    name: str
+
+class DeleteCashAccount(BaseModel):
+    id: int
     
 class CashAccountRepository:
 
