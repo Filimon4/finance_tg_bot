@@ -1,3 +1,4 @@
+from asyncio.log import logger
 from fastapi import HTTPException
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -36,10 +37,10 @@ class CategoryRepository:
             session.commit()
             return new_category
         except Exception as e:
-            print(e)
+            logger.error(f"{str(e)}")
             return None 
         except SQLAlchemyError as e:
-            print(e)
+            logger.error(f"{str(e)}")
             return None
 
     @staticmethod
@@ -47,7 +48,7 @@ class CategoryRepository:
         try:
             return session.query(Category).filter(Category.id == category_id).first()
         except SQLAlchemyError as e:
-            print(f"Ошибка при получении категории: {e}")
+            logger.error(f"Ошибка при получении категории: {str(e)}")
             return None
         
     @staticmethod
@@ -62,7 +63,7 @@ class CategoryRepository:
         try:
             return session.query(Category).filter(Category.account_id == tg_id).all()
         except SQLAlchemyError as e:
-            print(f"Ошибка при получении категории: {e}")
+            logger.error(f"Ошибка при получении категории: {str(e)}")
             return None
 
     @staticmethod
@@ -89,13 +90,13 @@ class CategoryRepository:
         except HTTPException:
             raise 
         except SQLAlchemyError as e:
-            print(f"Database error: {str(e)}")
+            logger.error(f"Database error: {str(e)}")
             raise HTTPException(
                 status_code=500,
                 detail="Database error occurred"
             )
         except Exception as e:
-            print(f"Unexpected error: {str(e)}")
+            logger.error(f"Unexpected error: {str(e)}")
             raise HTTPException(
                 status_code=500,
                 detail="Internal server error"
@@ -110,10 +111,10 @@ class CategoryRepository:
             session.commit()
             return True
         except Exception as e:
-            print(e)
+            logger.error(f"{str(e)}")
             return False
         except SQLAlchemyError as e:
-            print(e)
+            logger.error(f"{str(e)}")
             return False
         
     @staticmethod
@@ -141,6 +142,6 @@ class CategoryRepository:
                 'balance': float(float(total_income) - float(total_expenses))
             }
         except SQLAlchemyError as e:
-            print(e)
+            logger.error(f"{str(e)}")
             return None
 

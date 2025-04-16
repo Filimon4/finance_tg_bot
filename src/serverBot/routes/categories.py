@@ -1,3 +1,4 @@
+from asyncio.log import logger
 from fastapi import Query
 from fastapi.responses import JSONResponse
 from src.db.models import Category
@@ -12,7 +13,6 @@ async def all(tg_id: int = Query(None)):
     try:
         with DB.get_session() as session:
             allCategories = CategoryRepository.getAll(session, tg_id)
-            print(allCategories[0].base_type.name)
             
             allCategoriesJson = [
                 {
@@ -30,7 +30,7 @@ async def all(tg_id: int = Query(None)):
             )
             
     except Exception as e:
-        print(e)
+        logger.error(f"{str(e)}")
         return JSONResponse(
             status_code=500,
             content={"success": False, "error": str(e)}
@@ -65,7 +65,7 @@ async def getOverview(tg_id: int = Query(None)):
                 content={"success": True, 'total_overview': total_overview},
             )
     except Exception as e:
-        print(e)
+        logger.error(f"{str(e)}")
         return JSONResponse(
             status_code=500,
             content={"success": False, "error": str(e)}
@@ -76,14 +76,13 @@ async def getCategoryOverview(id: int, tg_id: int = Query(None)):
     try:
         with DB.get_session() as session:
             categoryOverview = CategoryRepository.getCategoryOverview(session, tg_id, id)
-            print(categoryOverview)
 
             return JSONResponse(
                 status_code=200,
                 content={"overview": categoryOverview},
             )
     except Exception as e:
-        print(e)
+        logger.error(f"{str(e)}")
         return JSONResponse(
             status_code=500,
             content={"success": False, "error": str(e)}
@@ -108,7 +107,7 @@ async def getCategoryOverview(id: int):
                 content={"success": True, "category": categoryJson},
             )
     except Exception as e:
-        print(e)
+        logger.error(f"{str(e)}")
         return JSONResponse(
             status_code=500,
             content={"success": False, "error": str(e)}
@@ -129,7 +128,7 @@ async def createCategory(data: CategoryCreateDTO):
                 content={"success": False, 'new_category': category_data}
             )
     except Exception as e:
-        print(e)
+        logger.error(f"{str(e)}")
         return JSONResponse(
             status_code=500,
             content={"success": False, "error": str(e)}
@@ -147,13 +146,12 @@ async def updateCategory(data: CategoryUpdateDTO):
                 'account_id':  updatedCategory.account_id,
                 'base_type': updatedCategory.base_type.name,
             }
-            print(categoryData)
             return JSONResponse(
                 status_code=200,
                 content={"success": True, "category": categoryData}
             )
     except Exception as e:
-        print(e)
+        logger.error(f"{str(e)}")
         return JSONResponse(
             status_code=500,
             content={"success": False, "error": str(e)}
@@ -171,6 +169,7 @@ async def delete(data: CategoryDeleteDTO):
                 content={"success": True}
             )
     except Exception as e:
+        logger.error(f"{str(e)}")
         return JSONResponse(
             status_code=500,
             content={"success": False, "error": str(e)}

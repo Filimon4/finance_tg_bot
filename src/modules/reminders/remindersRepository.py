@@ -1,3 +1,4 @@
+from asyncio.log import logger
 from datetime import datetime, timedelta
 from src.db.models.Operations import Operations
 from pydantic import BaseModel
@@ -106,7 +107,7 @@ class RemindersRepository:
       session.commit()
       return reminder
     except Exception as e:
-      print('-- create reminder error: ', e)
+      logger.error(f"create reminder error: {str(e)}")
       raise Exception(e)
 
   @staticmethod
@@ -138,7 +139,7 @@ class RemindersRepository:
 
       return reminder
     except SQLAlchemyError as e:
-      print(e)
+      logger.error(f"{str(e)}")
       raise Exception(e)
     except Exception as e:
       raise Exception(e)

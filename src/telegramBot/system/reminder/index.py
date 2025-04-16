@@ -50,7 +50,6 @@ class ReminderSystem:
 
     async def sendReminder(self, reminder) -> bool:
         try:
-            print('-- ReminderSystem: sendReminder, reminder:', reminder.id, reminder.account.id)
             user_id = reminder.account.id
             reminder_messages = [
                 "🔔 Напоминание: Не забудь внести последние расходы! Финансы любят порядок.",
@@ -64,7 +63,6 @@ class ReminderSystem:
             ]
             
             random_message = random.choice(reminder_messages)
-            print(random_message)
             await MainBotTg.send_message(text=random_message, chat_id=user_id)
             return True
         except Exception as e:
@@ -77,8 +75,8 @@ class ReminderSystem:
                     for reminder in reminders:
                         await self.sendReminder(reminder)
         except Exception as e:
-            print(e)
+            logger.error(f"{str(e)}")
         except SQLAlchemyError as e:
-            print(e)
+            logger.error(f"{str(e)}")
 
 Reminder = ReminderSystem()

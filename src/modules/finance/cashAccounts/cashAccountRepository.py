@@ -1,3 +1,4 @@
+from asyncio.log import logger
 from fastapi import HTTPException
 from sqlalchemy import Result, Select, func, select
 from sqlalchemy.orm import Session
@@ -54,7 +55,7 @@ class CashAccountRepository:
 
             return result
         except SQLAlchemyError as e:
-            print(f"Ошибка при создании аккаунта: {e}")
+            logger.error(f"Ошибка при создании аккаунта: {str(e)}")
             return None
 
     @staticmethod
@@ -64,7 +65,7 @@ class CashAccountRepository:
             result = session.execute(query)
             return result.scalars().first()
         except SQLAlchemyError as e:
-            print(f"Ошибка при получении аккаунта: {e}")
+            logger.error(f"Ошибка при получении аккаунта: {str(e)}")
             return None
     
     @staticmethod
@@ -89,7 +90,7 @@ class CashAccountRepository:
             accounts_result: Result = session.execute(query)
             return accounts_result.scalars().all()
         except SQLAlchemyError as e:
-            print(f"Ошибка при получении аккаунта: {e}")
+            logger.error(f"Ошибка при получении аккаунта: {str(e)}")
             return None
         
     @staticmethod
@@ -116,7 +117,7 @@ class CashAccountRepository:
                 'balance': float(float(total_income) - float(total_expenses))
             }
         except SQLAlchemyError as e:
-            print(f"Ошибка при получении аккаунта: {e}")
+            logger.error(f"Ошибка при получении аккаунта: {str(e)}")
             return None
         
     

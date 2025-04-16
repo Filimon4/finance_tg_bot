@@ -1,3 +1,4 @@
+from asyncio.log import logger
 import json
 import re
 from aiogram import F
@@ -97,17 +98,16 @@ async def update_currency(message: Message):
     try:
         text = message.text.strip()
         api_type = text.split(" ")[1]
-        print('api_type: ', api_type)
         if not api_type or len(api_type) <= 0:
             await message.answer(text="Не указан api_type")
             return
         CurrencySys.updateApiCurrencies(api_type)
         await message.answer(text=f"Обновление валюты {api_type} завершено")
     except SQLAlchemyError as e:
-        print(e)
+        logger.error(f"{str(e)}")
         await message.answer(text=f"Ошибка при проверке напоминаний")
     except Exception as e:
-        print(e)
+        logger.error(f"{str(e)}")
         await message.answer(text=f"Ошибка при проверке напоминаний")
 
 @BotDispatcher.message(Command(commands=BotTgCommands.UPDATE_CURRENCY_RATES.value))
@@ -121,10 +121,10 @@ async def update_currency_rates(message: Message):
         CurrencySys.updateApiRates(api_type)
         await message.answer(text=f"Курсы валют {api_type} обновлены")
     except SQLAlchemyError as e:
-        print(e)
+        logger.error(f"{str(e)}")
         await message.answer(text=f"Ошибка при проверке напоминаний")
     except Exception as e:
-        print(e)
+        logger.error(f"{str(e)}")
         await message.answer(text=f"Ошибка при проверке напоминаний")
 
 @BotDispatcher.message(Command(commands=BotTgCommands.ALL_THIRD_APIS.value))
@@ -133,10 +133,10 @@ async def send_all_apies(message: Message):
         text = "\n".join(CurrencyEnum.get_list())
         await message.answer(text=f"Список всех API: \n{text}")
     except SQLAlchemyError as e:
-        print(e)
+        logger.error(f"{str(e)}")
         await message.answer(text=f"Ошибка при проверке напоминаний")
     except Exception as e:
-        print(e)
+        logger.error(f"{str(e)}")
         await message.answer(text=f"Ошибка при проверке напоминаний")
 
 @BotDispatcher.message(Command(commands=BotTgCommands.API_STATUS.value))
@@ -148,13 +148,12 @@ async def send_api_status(message: Message):
             await message.answer(text="Не указан api_type")
             return
         text = CurrencySys.getApiStatus(api_type)
-        print(text)
         await message.answer(text=f"Список всех API: \n{text}")
     except SQLAlchemyError as e:
-        print(e)
+        logger.error(f"{str(e)}")
         await message.answer(text=f"Ошибка при проверке напоминаний")
     except Exception as e:
-        print(e)
+        logger.error(f"{str(e)}")
         await message.answer(text=f"Ошибка при проверке напоминаний")
 
 

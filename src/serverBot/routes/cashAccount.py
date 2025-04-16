@@ -1,3 +1,4 @@
+from asyncio.log import logger
 from fastapi import HTTPException, Query
 from fastapi.responses import JSONResponse
 from sqlalchemy import Result, Select, func, select
@@ -30,7 +31,7 @@ async def getCashAccounts(tg_id: int = Query(None), page: int = 0, limit: int = 
                 content={"success": True, "all": account_data}
             )
     except Exception as e:
-        print(f"Error in getCashAccounts: {e}")
+        logger.error(f"Error in getCashAccounts: {str(e)}")
         return JSONResponse(
             status_code=500,
             content={"success": False, "error": str(e)}
@@ -59,13 +60,13 @@ async def getCashAccount(id: int):
                 }
             )
     except HTTPException:
-        print(f"Error in get_cash_account: {e}")
+        logger.error(f"Error in get_cash_account: {str(e)}")
         return JSONResponse(
             status_code=500,
             content={"success": False, "error": str(e)}
         )
     except Exception as e:
-        print(f"Error in get_cash_account: {e}")
+        logger.error(f"Error in get_cash_account: {str(e)}")
         return JSONResponse(
             status_code=500,
             content={"success": False, "error": str(e)}
@@ -95,13 +96,13 @@ async def getCashAccountsOverview(tg_id: int):
             content={"accounts_overview": accountsOverview},
         )
     except HTTPException as e:
-       print(e)
+       logger.error(e)
        return JSONResponse(
           status_code=500,
           content={"success": False, "error": str(e)}
       )
     except Exception as e:
-      print(f"Error in get_cash_account: {e}")
+      logger.error(f"Error in get_cash_account: {str(e)}")
       return JSONResponse(
           status_code=500,
           content={"success": False, "error": str(e)}
@@ -129,7 +130,7 @@ async def getSingleCashAccountOverview(id: int):
             content={'account': accountDataJson}
         )
     except Exception as e:
-      print(f"Error in get_cash_account: {e}")
+      logger.error(f"Error in get_cash_account: {str(e)}")
       return JSONResponse(
           status_code=500,
           content={"success": False, "error": str(e)}
@@ -158,7 +159,7 @@ async def createCashAccount(account_data: CashAccountCreate):
                 }}
         )
     except Exception as e:
-      print(f"Error in get_cash_account: {e}")
+      logger.error(f"Error in get_cash_account: {str(e)}")
       return JSONResponse(
           status_code=500,
           content={"success": False, "error": str(e)}
@@ -187,7 +188,7 @@ async def updateCashAccount(account_data: UpdateCashAccount):
                 }}
         )
     except Exception as e:
-      print(f"Error in get_cash_account: {e}")
+      logger.error(f"Error in get_cash_account: {str(e)}")
       return JSONResponse(
           status_code=500,
           content={"success": False, "error": str(e)}
@@ -198,7 +199,6 @@ async def deleteCashAccount(data: DeleteCashAccount):
     try:
       with DB.get_session() as session:
         account = session.query(CashAccount).filter(CashAccount.id == data.id).first()
-        print(account)
         if not account:
             raise HTTPException(status_code=404, detail="Cash account not found")
 
@@ -209,7 +209,7 @@ async def deleteCashAccount(data: DeleteCashAccount):
           content={"success": True, "message": "Cash account deleted successfully"}
         )
     except Exception as e:
-      print(f"Error in get_cash_account: {e}")
+      logger.error(f"Error in get_cash_account: {str(e)}")
       return JSONResponse(
           status_code=500,
           content={"success": False, "error": str(e)}

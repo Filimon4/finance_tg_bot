@@ -1,3 +1,4 @@
+from asyncio.log import logger
 import datetime
 from fastapi import HTTPException
 from pydantic import BaseModel, Field
@@ -59,12 +60,15 @@ class OperationsRepository:
     @staticmethod
     def create( session: Session, data: OperationCreateDTO):
         try:
-            print(data)
-            if (data.to_cash_account_id and data.category_id) or (not data.to_cash_account_id and not data.category_id):
-                raise Exception("Invalid data: to_cash_account_id and category_id must be mutually exclusive.")
-            if (data.to_cash_account_id != None and data.category_id == None):
-                if (data.type.value != OperationType.TRANSFER.value):
-                    raise Exception("Invalid data: to_cash_account_id must be None if type is not transfer.")
+            if data.to_cash_account_id is not None and data.category_id is not None:
+                raise ValueError("Недопустимые данные: to_cash_account_id и category_id не могут быть заполнены одновременно")
+            
+            if data.to_cash_account_id is not None and data.type != OperationType.TRANSFER:
+                raise ValueError("Недопустимые данные: to_cash_account_id может быть указан только для операций типа TRANSFER")
+            
+            if data.to_cash_account_id is None and data.type != OperationType.TRANSFER and data.category_id is None:
+                raise ValueError("Недопустимые данные: для операций типа INCOME/EXPENSE должна быть указана category_id")
+
             operationData = {
                 'account_id': data.account_id,
                 'name': data.name if data.name is not None else '',
@@ -80,7 +84,7 @@ class OperationsRepository:
             session.commit()
             return operation
         except SQLAlchemyError as e:
-            print(f"Ошибка при создании операции: {e}")
+            logger.error(f"Ошибка при создании операции: {str(e)}")
             return None
 
     @staticmethod
@@ -133,6 +137,15 @@ class OperationsRepository:
         try:
             operation = session.query(Operations).filter(Operations.id == data.oper_id).first()
             if not operation: raise Exception("There is not operation")
+
+            if data.to_cash_account_id is not None and data.category_id is not None:
+                raise ValueError("Недопустимые данные: to_cash_account_id и category_id не могут быть заполнены одновременно")
+            
+            if data.to_cash_account_id is not None and data.type != OperationType.TRANSFER:
+                raise ValueError("Недопустимые данные: to_cash_account_id может быть указан только для операций типа TRANSFER")
+            
+            if data.to_cash_account_id is None and data.type != OperationType.TRANSFER and data.category_id is None:
+                raise ValueError("Недопустимые данные: для операций типа INCOME/EXPENSE должна быть указана category_id")
 
             if hasattr(data, 'amount'):
                 operation.amount = data.amount if data.amount is not None else None

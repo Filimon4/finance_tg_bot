@@ -1,3 +1,4 @@
+from asyncio.log import logger
 from fastapi import Query
 from fastapi.responses import JSONResponse
 from src.modules.accounts.accountsRepository import AccountCreateDTO, AccountRepository
@@ -39,7 +40,6 @@ def balance(tg_id: int = Query(None)):
     try:
         with DB.get_session() as session:
             accountBalanceOverview = AccountRepository.getAccountOverview(session, tg_id)
-            print(accountBalanceOverview)
             
             return JSONResponse(
                 content={
@@ -48,7 +48,7 @@ def balance(tg_id: int = Query(None)):
                 }
             )
     except Exception as e:
-        print(e)
+        logger.error(f"{str(e)}")
         return JSONResponse(
             status_code=500,
             content={"success": False, "error": str(e)}
@@ -69,7 +69,7 @@ def createAccount(data: AccountCreateDTO):
             )
 
     except Exception as e:
-        print(e)
+        logger.error(f"{str(e)}")
         return JSONResponse(
             status_code=500,
             content={"success": False, "error": str(e)}
@@ -90,7 +90,7 @@ def getAccount(id: int = Query(None)):
             )
 
     except Exception as e:
-        print(e)
+        logger.error(f"{str(e)}")
         return JSONResponse(
             status_code=500,
             content={"success": False, "error": str(e)}
@@ -107,7 +107,7 @@ def deleteAccount(id: int = Query(None)):
                 content={"success": True}
             )
     except Exception as e:
-        print(e)
+        logger.error(f"{str(e)}")
         return JSONResponse(
             status_code=500,
             content={"success": False, "error": str(e)}

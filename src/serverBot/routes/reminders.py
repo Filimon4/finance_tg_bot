@@ -1,3 +1,4 @@
+from asyncio.log import logger
 from fastapi import Query, Request
 from fastapi.responses import JSONResponse
 from src.db.models.Reminder import ReminderCreateDTO, ReminderUpdateDTO
@@ -6,32 +7,6 @@ from src.db.index import DB
 from src.modules.finance.cashAccounts.cashAccountRepository import CashAccountRepository
 from src.modules.finance.operations.operationsRepository import OperationsRepository
 from ..index import app
-
-@app.get('/api/reminders/all', tags=['Reminders'])
-def getAllNotifies():
-  try:
-    with DB.get_session() as session:
-      reminders = RemindersRepository.getAll(session)
-      reminders_data = [
-        {
-          'id': r.id,
-          'day_of_week': r.day_of_week.value, 
-          'hour': str(r.hour),
-          'next_time': str(r.next_time),
-          'is_active': r.is_active,
-          'created_at': str(r.created_at),
-        }
-        for r in reminders 
-      ]
-      return JSONResponse(
-        status_code=200,
-        content={"success": True, "reminders": reminders_data}
-      )
-  except Exception as e:
-    return JSONResponse(
-        status_code=500,
-        content={"success": False, "error": str(e)}
-    )
   
 @app.get('/api/reminders/users_reminders', tags=['Reminders'])
 def getById(tg_id: int = Query(None)):
@@ -104,7 +79,7 @@ def createReminder(data: ReminderCreateDTO):
         content={"success": True, "reminder": reminderData}
       )
   except Exception as e:
-    print(e)
+    logger.error(f"{str(e)}")
     return JSONResponse(
         status_code=500,
         content={"success": False, "error": str(e)}
@@ -115,7 +90,6 @@ def updateReminder(data: ReminderUpdateDTO):
   try:
     with DB.get_session() as session:
       reminders = RemindersRepository.update(session, data)
-      print(reminders)
       if not reminders: raise Exception('Failed to update')
 
       reminderData = {
@@ -140,7 +114,6 @@ def updateReminder(data: ReminderUpdateDTO):
 @app.delete('/api/reminders', tags=['Reminders'])
 def deleteReminder(id: int = Query(None)):
   try:
-    print('/api/reminders ',id)
     with DB.get_session() as session:
       deleted = RemindersRepository.delete(session, id)
       if not deleted: raise Exception('Failed to delete')

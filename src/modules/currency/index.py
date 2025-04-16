@@ -1,3 +1,4 @@
+from asyncio.log import logger
 from enum import Enum
 import requests
 
@@ -75,16 +76,16 @@ class ThirdCurrencyAPI(BaseCurrencyAPI):
             response.raise_for_status()
             return response.json()
         except requests.RequestException as e:
-            print(f"Ошибка при выполнении запроса к {url}: {e}")
+            logger.error(f"Ошибка при выполнении запроса к {str(url)}: {str(e)}")
             return None
         except requests.HTTPError as e:
-            print(f"HTTP ошибка при запросе к {url}: {e}")
+            logger.error(f"HTTP ошибка при запросе к {str(url)}: {str(e)}")
             return None
         except requests.JSONDecodeError as e:
-            print(f"Ошибка при обработке JSON из {url}: {e}")
+            logger.error(f"Ошибка при обработке JSON из {str(url)}: {str(e)}")
             return None
         except requests.Timeout as e:
-            print(f"Таймаут при запросе к {url}: {e}")
+            logger.error(f"Таймаут при запросе к {str(url)}: {str(e)}")
             return None
         
     def get_status(self):
@@ -100,7 +101,7 @@ class ThirdCurrencyAPI(BaseCurrencyAPI):
         
         if 'month' in quotas:
             monthData = quotas['month'] 
-            print(monthData)
+            logger.error(f"{str(monthData)}")
             result['month'] = monthData
             if monthData['remaining'] > 0:
                 result['active'] = True
@@ -171,16 +172,16 @@ class ThirdCoinMarkerAPI(BaseCurrencyAPI):
             response.raise_for_status()
             return response.json()
         except requests.RequestException as e:
-            print(f"Ошибка при выполнении запроса к {url}: {e}")
+            logger.error(f"Ошибка при выполнении запроса к {str(url)}: {str(e)}")
             return None
         except requests.HTTPError as e:
-            print(f"HTTP ошибка при запросе к {url}: {e}")
+            logger.error(f"HTTP ошибка при запросе к {str(url)}: {str(e)}")
             return None
         except requests.JSONDecodeError as e:
-            print(f"Ошибка при обработке JSON из {url}: {e}")
+            logger.error(f"Ошибка при обработке JSON из {str(url)}: {str(e)}")
             return None
         except requests.Timeout as e:
-            print(f"Таймаут при запросе к {url}: {e}")
+            logger.error(f"Таймаут при запросе к {str(url)}: {str(e)}")
             return None
         
     def get_status(self):

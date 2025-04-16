@@ -1,3 +1,4 @@
+from asyncio.log import logger
 import os
 import re
 import importlib
@@ -30,7 +31,7 @@ def load_modules_by_regex(directory, pattern):
                 full_module_path = f"{module_path}.{module_name}"
 
                 try:
-                    print(f"Импортируем модуль: {full_module_path}")
+                    logger.error(f"Импортируем модуль: {str(full_module_path)}")
                     importlib.import_module(full_module_path)
                 except ImportError as e:
-                    print(f"Ошибка при импорте модуля {full_module_path}: {e}")
+                    logger.error(f"Ошибка при импорте модуля {str(full_module_path)}: {str(e)}")

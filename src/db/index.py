@@ -155,5 +155,5 @@ try:
         Base.metadata.create_all(DB.engine)
         logger.info("Database tables verified/created successfully")
 except (SQLAlchemyError, ConnectionError) as e:
-    print(f"FATAL: Failed to initialize database connection: {e}")
+    logger.error(f"FATAL: Failed to initialize database connection: {str(e)}")
     raise

@@ -14,7 +14,6 @@ class ScheduleSystem:
             time.sleep(5)
 
     def start(self):
-        print('--- ScheduleSystem start')
         if self._running:
             return
             

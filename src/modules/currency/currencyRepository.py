@@ -1,3 +1,4 @@
+from asyncio.log import logger
 from typing import Dict, List
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -22,7 +23,7 @@ class CurrencyRepository:
                     rate_value
                 )
         except SQLAlchemyError as e:
-            print(f"Database SQLAlchemyError: {e}")
+            logger.error(f"Database SQLAlchemyError: {str(e)}")
 
 
     @staticmethod
@@ -85,7 +86,7 @@ class CurrencyRepository:
                 )
                 session.add(new_rate)
         except SQLAlchemyError as e:
-            print(e)
+            logger.error(f"{str(e)}")
 
     @staticmethod
     def create_exchange_rate(session: Session, from_currency_id: int, to_currency_id: int, rate: Decimal):

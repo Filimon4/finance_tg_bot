@@ -54,7 +54,7 @@ class CurrencySystem:
             name = data['name']
             CurrencyRepository.get_or_create_currency(session, symbol, name, name, symbol)
           except SQLAlchemyError as e:
-            print(e)
+            logger.error(f"{str(e)}")
         session.commit()
 
     def updateApiRates(self, api):
@@ -68,7 +68,7 @@ class CurrencySystem:
             rates = data['data']
             CurrencyRepository.sync_currency_rates(session, base, rates)
           except SQLAlchemyError as e:
-            print(e)
+            logger.error(f"{str(e)}")
         session.commit()
     
 CurrencySys = CurrencySystem()

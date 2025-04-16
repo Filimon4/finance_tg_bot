@@ -1,3 +1,4 @@
+from asyncio.log import logger
 from datetime import datetime, timedelta
 import re
 import tempfile
@@ -43,10 +44,10 @@ class ExcelReportGenerator:
                 )
 
         except SQLAlchemyError as e:
-            print(f"Database error: {e}")
+            logger.error(f"Database error: {str(e)}")
             await MainBotTg.answer(text="❌ Ошибка базы данных при экспорте")
         except Exception as e:
-            print(f"Export error: {e}")
+            logger.error(f"Export error: {str(e)}")
             await MainBotTg.answer(text="❌ Произошла ошибка при формировании отчета")
 
     @staticmethod
@@ -93,7 +94,7 @@ class ExcelReportGenerator:
                     os.remove(report_path)
 
         except Exception as e:
-            print(f"Error in generate_and_send_report: {e}")
+            logger.error(f"Error in generate_and_send_report: {str(e)}")
             raise
 
 
