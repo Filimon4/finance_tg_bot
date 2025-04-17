@@ -30,7 +30,7 @@ class ReminderSystem:
 
     def __init__(self):
         logger.info('-- Start ReminderSystem')
-        self._fetch_interval = 3600
+        self._fetch_interval = 600
         self._loop = asyncio.new_event_loop()
         self._task: Optional[asyncio.Task] = None
         self._stop_event = asyncio.Event()
