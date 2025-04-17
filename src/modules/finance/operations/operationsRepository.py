@@ -23,7 +23,7 @@ class OperationCreateDTO(BaseModel):
     type: OperationType
 
 class OperationUpdateDTO(BaseModel):
-    oper_id: int
+    id: int
     name: str | None
     cash_account_id: int | None
     to_cash_account_id: int | None
@@ -129,11 +129,23 @@ class OperationsRepository:
             
         except Exception as e:
             raise Exception(f"Failed to get operations: {str(e)}")
+        
+    @staticmethod
+    def getOperationById(session: Session, id: int):
+        try:
+            operation = (
+                session.query(Operations)
+                .filter(Operations.id == id)
+                .one()
+            )
+            return operation
+        except Exception as e:
+            raise Exception(f"Failed to get operations: {str(e)}")
 
     @staticmethod
     def update(session: Session, data: OperationUpdateDTO):
         try:
-            operation = session.query(Operations).filter(Operations.id == data.oper_id).first()
+            operation = session.query(Operations).filter(Operations.id == data.id).first()
             if not operation: raise Exception("There is not operation")
 
             if data.to_cash_account_id is not None and data.category_id is not None:

@@ -72,6 +72,33 @@ async def getOperations(tg_id: int = Query(None), page: int = Query(1), limit: i
             content={"success": False, "error": str(e)}
         )
     
+@app.get("/api/operations/{id}", tags=['Operations'])
+async def getOperation(id: int):
+    try:
+        with DB.get_session() as session:
+            operation = OperationsRepository.getOperationById(session, id)
+            operation_dict = {
+                "id": operation.id,
+                "name": operation.name,
+                "cash_account_id": operation.cash_account_id,
+                "to_cash_account_id": operation.to_cash_account_id,
+                "category_id": operation.category_id,
+                "account_id": operation.account_id,
+                "amount": float(operation.amount),
+                "description": operation.description,
+                "type": operation.type.name if operation.type else None,
+                "created_at": str(operation.created_at)
+            }
+            return JSONResponse(
+                status_code=200,
+                content={"success": True, "operation": operation_dict}
+            )
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": str(e)}
+        )
+    
 @app.post("/api/operations", tags=['Operations'])
 async def createOperation(data: OperationCreateDTO):
     try:
