@@ -65,9 +65,6 @@ class OperationsRepository:
             
             if data.to_cash_account_id is not None and data.type != OperationType.TRANSFER:
                 raise ValueError("Недопустимые данные: to_cash_account_id может быть указан только для операций типа TRANSFER")
-            
-            if data.to_cash_account_id is None and data.type != OperationType.TRANSFER and data.category_id is None:
-                raise ValueError("Недопустимые данные: для операций типа INCOME/EXPENSE должна быть указана category_id")
 
             operationData = {
                 'account_id': data.account_id,
@@ -143,9 +140,6 @@ class OperationsRepository:
             
             if data.to_cash_account_id is not None and data.type != OperationType.TRANSFER:
                 raise ValueError("Недопустимые данные: to_cash_account_id может быть указан только для операций типа TRANSFER")
-            
-            if data.to_cash_account_id is None and data.type != OperationType.TRANSFER and data.category_id is None:
-                raise ValueError("Недопустимые данные: для операций типа INCOME/EXPENSE должна быть указана category_id")
 
             if hasattr(data, 'amount'):
                 operation.amount = data.amount if data.amount is not None else None

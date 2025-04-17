@@ -83,7 +83,7 @@ class AccountRepository:
                 )
                 SELECT 
                     TO_CHAR(am.month, 'YYYY-MM') AS month_year,
-                    COALESCE(SUM(mt.monthly_balance) OVER (ORDER BY am.month), 0) AS cumulative_balance
+                    COALESCE(SUM(mt.monthly_balance) OVER (ORDER BY am.month), NULL) AS cumulative_balance
                 FROM all_months am
                 LEFT JOIN monthly_totals mt ON am.month = mt.month
                 ORDER BY am.month;

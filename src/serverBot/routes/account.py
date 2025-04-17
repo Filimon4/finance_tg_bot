@@ -16,10 +16,10 @@ def balanceSixM(tg_id: int = Query(None)):
 
             sixMonthOverviewJson = [
                 {
-                    "month": month_year.split('-')[1],  # только месяц "04"
-                    "year": month_year.split('-')[0],   # только год "2025"
-                    "month_year": month_year,           # полная дата "2025-04"
-                    "balance": float(balance) if balance is not None else 0.0
+                    "month": month_year.split('-')[1],
+                    "year": month_year.split('-')[0], 
+                    "month_year": month_year,         
+                    "balance": float(balance) if balance is not None else None
                 }
                 for month_year, balance in sixMonthOverview
             ]
