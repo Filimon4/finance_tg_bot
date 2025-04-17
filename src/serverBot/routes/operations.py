@@ -104,7 +104,7 @@ async def createOperation(data: OperationCreateDTO):
     try:
         with DB.get_session() as session:
             if data.to_cash_account_id == data.cash_account_id: 
-                raise Exception('to_cash_account_id equls cash_account_id')
+                raise Exception('to_cash_account_id equals cash_account_id')
             
             operation = OperationsRepository.create(session, data)
             operation_data = {
@@ -115,7 +115,8 @@ async def createOperation(data: OperationCreateDTO):
                 'category_id': operation.category_id if operation.category_id is not None else None,
                 'amount': float(operation.amount),
                 'description': operation.description,
-                'type': operation.type.name
+                'type': operation.type.name,
+                'created_at': str(operation.created_at),
             }
             return JSONResponse(
                 status_code=200,
@@ -159,7 +160,8 @@ async def updateOperation(data: OperationUpdateDTO):
                 'category_id': updated_operation.category_id,
                 'amount': float(updated_operation.amount),
                 'description': updated_operation.description,
-                'type': updated_operation.type.name
+                'type': updated_operation.type.name,
+                'created_at': str(updated_operation.created_at)
             }
 
             return JSONResponse(

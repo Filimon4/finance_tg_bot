@@ -21,6 +21,7 @@ class OperationCreateDTO(BaseModel):
     amount: int
     description: str | None
     type: OperationType
+    date: datetime.datetime
 
 class OperationUpdateDTO(BaseModel):
     id: int
@@ -75,7 +76,8 @@ class OperationsRepository:
                 'to_cash_account_id': data.to_cash_account_id,
                 'amount': data.amount,
                 'description': data.description if data.description else '',
-                'type': data.type
+                'type': data.type,
+                'created_at': data.date if data.date is not None else datetime.now()
             }
             operation = Operations(**operationData)
             session.add(operation)
