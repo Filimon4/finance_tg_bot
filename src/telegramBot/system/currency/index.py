@@ -21,11 +21,11 @@ class CurrencySystem:
 
     async def _run_periodically(self):
       while not self._stop_event.is_set():
+          await asyncio.sleep(self._fetch_interval)
           try:
-              await self.updateAllApi()  # Ваш метод для обработки напоминаний
+              await self.updateAllApi()
           except Exception as e:
               logging.error(f"ReminderSystem error: {e}")
-          await asyncio.sleep(self._fetch_interval)
 
     def updateAllApi(self):
       logger.info('-- CurrencySystem: updateAllApi')
@@ -34,10 +34,12 @@ class CurrencySystem:
 
     def updateRates(self):
       for api in CurrencyEnum.get_list():
+        logger.info(f'-- CurrencySystem: update Rates for {api}')
         self.updateApiRates(api)
 
     def updateCurrencies(self):
       for api in CurrencyEnum.get_list():
+        logger.info(f'-- CurrencySystem: update Currencies for {api}')
         self.updateApiCurrencies(api)
 
     def getApiStatus(self, api):

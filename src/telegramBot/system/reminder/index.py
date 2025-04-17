@@ -36,14 +36,13 @@ class ReminderSystem:
         self._stop_event = asyncio.Event()
 
     def _setup_scheduler(self):
-        # schedule.every(self._fetch_interval).seconds.do(self._startFetching_sync)
         if not self._task or self._task.done():
             self._task = asyncio.create_task(self._run_periodically())
 
     async def _run_periodically(self):
         while not self._stop_event.is_set():
             try:
-                await self.startFetching()  # Ваш метод для обработки напоминаний
+                await self.startFetching()
             except Exception as e:
                 logging.error(f"ReminderSystem error: {e}")
             await asyncio.sleep(self._fetch_interval)
@@ -51,6 +50,7 @@ class ReminderSystem:
     async def sendReminder(self, reminder) -> bool:
         try:
             user_id = reminder.account.id
+            if not user_id: return
             reminder_messages = [
                 "🔔 Напоминание: Не забудь внести последние расходы! Финансы любят порядок.",
                 "⏰ Время обновить записи! Занеси последние траты для точного учёта.",
@@ -73,6 +73,7 @@ class ReminderSystem:
             with DB.get_session() as session:
                 for reminders in self.paginatedRemindersGenerator(session):
                     for reminder in reminders:
+                        if not reminder: continue
                         await self.sendReminder(reminder)
         except Exception as e:
             logger.error(f"{str(e)}")

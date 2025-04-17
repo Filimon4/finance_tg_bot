@@ -20,6 +20,8 @@ class ReportDTO:
     category: str
     amount: float
     description: str
+    cash_account: str
+    name: str
     user_id: int
 
 class ExcelReportGenerator:
@@ -61,12 +63,10 @@ class ExcelReportGenerator:
             end_time = datetime.now()
             start_time = end_time - timedelta(days=30*month)
 
-            # Создаем временный файл с уникальным именем
             with tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False) as tmp_file:
                 report_path = tmp_file.name
 
             try:
-                # Генерируем отчет
                 report_generator = ExcelReportGenerator(report_path)
                 report_generator.generate_operations_report(
                     session=session,
@@ -75,7 +75,6 @@ class ExcelReportGenerator:
                     end_time=end_time
                 )
 
-                # Читаем и отправляем файл
                 with open(report_path, 'rb') as f:
                     file_data = f.read()
                 
@@ -112,23 +111,23 @@ class ExcelReportGenerator:
             
             for operations in self.paginatedOperationsGenerator(session, user_id, start_time, end_time, page_size):
                 for operation in operations:
-                    # Convert operation to ReportDTO
                     report_data = ReportDTO(
                         date=operation.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-                        category=operation.category.name if operation.category else "Unknown",
+                        category=operation.category.name if operation.category else "",
                         amount=float(operation.amount),
                         description=operation.description or "",
                         user_id=operation.account_id or 0,
+                        name=operation.name,
+                        cash_account=operation.cash_account.name
                     )
-                    
-                    # Add to Excel
                     next_row = ws.max_row + 1
                     data_values = [
                         report_data.date,
                         report_data.category,
+                        report_data.cash_account,
                         report_data.amount,
+                        report_data.name,
                         report_data.description,
-                        report_data.user_id,
                     ]
                     
                     for col_num, value in enumerate(data_values, start=1):
@@ -147,7 +146,7 @@ class ExcelReportGenerator:
         wb = Workbook()
         ws = wb.active
         ws.title = "data"
-        headers = ["Date", "Category", "Amount", "Description", "User ID"]
+        headers = ["Дата", "Категория", "Счёт", "Сумма", "Название", "Описание"]
         for col_num, header in enumerate(headers, 1):
             ws.cell(row=1, column=col_num, value=header)
         wb.save(self.report_file)

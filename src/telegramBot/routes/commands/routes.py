@@ -18,11 +18,15 @@ from src.telegramBot import (
 from aiogram.filters import Command
 from aiogram.types import (
     Message,
-    WebAppData
+    WebAppData,
+    CallbackQuery,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton
 )
 from sqlalchemy.exc import SQLAlchemyError
 
 from src.telegramBot.system.currency.index import CurrencySys
+from src.telegramBot.config.consts.KeyboardButtons import InlineKeyboardButtons, KeyboardButtons
 
 
 @BotDispatcher.message(Command(commands=BotTgCommands.START.value))
@@ -79,53 +83,61 @@ async def inline_operations(message: Message):
 async def send_all_reminders(message: Message):
     try:
         await Reminder.startFetching()
+        await message.answer(text='Все напоминания обновлены')
     except SQLAlchemyError as e:
-        await message.answer(text=f"Ошибка при проверке напоминаний")
+        await message.answer(text=f"Ошибка проверки напоминаний")
     except Exception as e:
-        await message.answer(text=f"Ошибка при проверке напоминаний")
+        await message.answer(text=f"Ошибка проверки напоминаний")
 
 @BotDispatcher.message(Command(commands=BotTgCommands.UPDTATE_ALL_CURRENCY.value))
 async def update_all_currency(message: Message):
     try:
+        await message.answer(text='Обновляем все валюты и курсы...')
         CurrencySys.updateAllApi()
     except SQLAlchemyError as e:
-        await message.answer(text=f"Ошибка при проверке напоминаний")
+        await message.answer(text=f"Ошибка обновления валют")
     except Exception as e:
-        await message.answer(text=f"Ошибка при проверке напоминаний")
+        await message.answer(text=f"Ошибка обновления валют")
 
 @BotDispatcher.message(Command(commands=BotTgCommands.UPDTATE_CURRENCY.value))
 async def update_currency(message: Message):
     try:
-        text = message.text.strip()
-        api_type = text.split(" ")[1]
-        if not api_type or len(api_type) <= 0:
-            await message.answer(text="Не указан api_type")
+        args = message.text.strip().split(" ")
+        if len(args) <= 1:
+            await message.answer(text="Не указан api")
+            text = "\n".join(CurrencyEnum.get_list())
+            await message.answer(text=f"Список всех API: \n{text}")
             return
+        api_type=args[1]
+        await message.answer(text='Обновляем валюты...')
         CurrencySys.updateApiCurrencies(api_type)
         await message.answer(text=f"Обновление валюты {api_type} завершено")
     except SQLAlchemyError as e:
         logger.error(f"{str(e)}")
-        await message.answer(text=f"Ошибка при проверке напоминаний")
+        await message.answer(text=f"Ошибка обновления валют")
     except Exception as e:
         logger.error(f"{str(e)}")
-        await message.answer(text=f"Ошибка при проверке напоминаний")
+        await message.answer(text=f"Ошибка обновления валют")
 
 @BotDispatcher.message(Command(commands=BotTgCommands.UPDATE_CURRENCY_RATES.value))
 async def update_currency_rates(message: Message):
     try:
-        text = message.text.strip()
-        api_type = text.split(" ")[1]
-        if not api_type or len(api_type) <= 0:
-            await message.answer(text="Не указан api_type")
+        args = message.text.strip().split(" ")
+        if len(args) <= 1:
+            await message.answer(text="Не указан api")
+            text = "\n".join(CurrencyEnum.get_list())
+            await message.answer(text=f"Список всех API: \n{text}")
             return
+        api_type=args[1]
+        await message.answer(text='Обновляем курсы валют...')
         CurrencySys.updateApiRates(api_type)
         await message.answer(text=f"Курсы валют {api_type} обновлены")
     except SQLAlchemyError as e:
         logger.error(f"{str(e)}")
-        await message.answer(text=f"Ошибка при проверке напоминаний")
+        await message.answer(text=f"Ошибка обновления курсов")
     except Exception as e:
         logger.error(f"{str(e)}")
-        await message.answer(text=f"Ошибка при проверке напоминаний")
+        await message.answer(text=f"Ошибка обновления курсов")
 
 @BotDispatcher.message(Command(commands=BotTgCommands.ALL_THIRD_APIS.value))
 async def send_all_apies(message: Message):
@@ -134,27 +146,61 @@ async def send_all_apies(message: Message):
         await message.answer(text=f"Список всех API: \n{text}")
     except SQLAlchemyError as e:
         logger.error(f"{str(e)}")
-        await message.answer(text=f"Ошибка при проверке напоминаний")
+        await message.answer(text=f"Ошибка отправки всех apis")
     except Exception as e:
         logger.error(f"{str(e)}")
-        await message.answer(text=f"Ошибка при проверке напоминаний")
+        await message.answer(text=f"Ошибка отправки всех apis")
 
 @BotDispatcher.message(Command(commands=BotTgCommands.API_STATUS.value))
 async def send_api_status(message: Message):
     try:
-        text = message.text.strip()
-        api_type = text.split(" ")[1]
-        if not api_type or len(api_type) <= 0:
-            await message.answer(text="Не указан api_type")
+        args = message.text.strip().split(" ")
+        if len(args) <= 1:
+            await message.answer(text="Не указан api")
+            text = "\n".join(CurrencyEnum.get_list())
+            await message.answer(text=f"Список всех API: \n{text}")
             return
+        api_type = args[1]
         text = CurrencySys.getApiStatus(api_type)
-        await message.answer(text=f"Список всех API: \n{text}")
+        await message.answer(text=f"Статус {api_type}: \n{text}")
     except SQLAlchemyError as e:
         logger.error(f"{str(e)}")
-        await message.answer(text=f"Ошибка при проверке напоминаний")
+        await message.answer(text=f"Ошибка отправки всех api статусов")
     except Exception as e:
         logger.error(f"{str(e)}")
-        await message.answer(text=f"Ошибка при проверке напоминаний")
+        await message.answer(text=f"Ошибка отправки всех api статусов")
 
 
+@BotDispatcher.message(Command(commands=BotTgCommands.HELP.value))
+async def send_help(message: Message):
+    try:
+        # TODO: Поменять когда добавится панель админа
+        help_text = (
+            "🤖 <b>Доступные команды:</b>\n\n"
+            "🔹 /start — Запуск бота и приветственное сообщение\n"
+            "🔹 /help — Показать это сообщение помощи\n"
+            "🔹 /export — Экспортировать данные\n"
+            "🔹 /check_all_reminders — Проверка всех напоминаний\n"
+            "🔹 /updtate_all_currency — Обновить все валюты (есть опечатка в названии)\n"
+            "🔹 /update_currency — Обновить конкретную валюту\n"
+            "🔹 /update_currency_rates — Обновить курсы валют\n"
+            "🔹 /all_third_apis — Показать все сторонние API\n"
+            "🔹 /api_status — Проверить статус API\n\n"
+            "ℹ️ Все команды можно вызывать с символом '/' в начале.\n"
+        )
 
+        buttons = InlineKeyboardButtons[BotTgCommands.HELP]
+        keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
+
+        await message.answer(text=help_text, parse_mode="HTML", reply_markup=keyboard)
+    except Exception as e:
+        logger.error(f"{str(e)}")
+        await message.answer(text=f"Ошибка в команде помощи")
+
+@BotDispatcher.callback_query()
+async def handle_callback(callback_query: CallbackQuery):
+    data = callback_query.data
+
+    print(data)
+    
+    await callback_query.answer()

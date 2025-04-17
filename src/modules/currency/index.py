@@ -30,7 +30,7 @@ class BaseCurrencyAPI:
 class ThirdCurrencyAPI(BaseCurrencyAPI):
     api_key = "cur_live_D0hTJNbg79DzKONmXYXzEwvVb7YaftpRYM6cExQe"
     url = "https://api.currencyapi.com/v3"
-    base_currencies = ['EUR','USD','CHF','RUB','JPY','GBP'],
+    base_currencies = ['EUR','USD','CHF','RUB','JPY','GBP']
 
     def __init__(self):
         super().__init__()
@@ -38,11 +38,11 @@ class ThirdCurrencyAPI(BaseCurrencyAPI):
     def get_all(self):
         currencies = ",".join(self.base_currencies)
 
-        params = {}
-        params["currencies"] = currencies
+        params = {
+            "currencies": currencies
+        }
 
         url = f"{self.url}/currencies"
-
         data = self._make_api_request(url, params)
         if not data or not data['data']:
             return []
@@ -108,7 +108,27 @@ class ThirdCurrencyAPI(BaseCurrencyAPI):
             else:
                 result['active'] = False
 
-        return result
+        return self._format_currency_api_status(result)
+    
+    def _format_currency_api_status(self, data):
+        if not data or not data.get('active'):
+            return "💱 Статус currency_api: неактивен ❌"
+
+        month = data.get('month', {})
+        total = month.get('total', '—')
+        used = month.get('used', '—')
+        remaining = month.get('remaining', '—')
+
+        message = (
+            f"💱 Статус currency_api: активен ✅\n\n"
+            f"📊 Лимит на месяц:\n"
+            f"• Всего запросов: {total}\n"
+            f"• Использовано: {used}\n"
+            f"• Осталось: {remaining}"
+        )
+
+        return message
+
 
 class ThirdCoinMarkerAPI(BaseCurrencyAPI):
     api_key = "65054a26-7950-4765-9d8c-4bdcb2c1050b"
@@ -210,7 +230,44 @@ class ThirdCoinMarkerAPI(BaseCurrencyAPI):
             else:
                 result['active'] = True
         
-        return result
+        return self._format_status_message(result)
+    
+    def _format_status_message(self, data):
+        if not data or not data.get('active'):
+            return "🔐 Статус ключа: неактивен ❌"
+
+        timestamp = data.get('timestamp', '—')
+        plan = data.get('plan', {})
+        usage = data.get('usage', {})
+
+        plan_text = (
+            f"💳 Тарифный план:\n"
+            f"• Месячный лимит кредитов: {plan.get('credit_limit_monthly', '—')}\n"
+            f"• Сброс лимита через: {plan.get('credit_limit_monthly_reset', '—')}\n"
+            f"• Дата сброса: {plan.get('credit_limit_monthly_reset_timestamp', '—')}\n"
+            f"• Лимит запросов в минуту: {plan.get('rate_limit_minute', '—')}"
+        )
+
+        usage_text = (
+            f"📊 Использование:\n"
+            f"🔁 Текущая минута:\n"
+            f"  • Запросов сделано: {usage.get('current_minute', {}).get('requests_made', '—')}\n"
+            f"  • Осталось запросов: {usage.get('current_minute', {}).get('requests_left', '—')}\n"
+            f"📅 Сегодня:\n"
+            f"  • Кредитов использовано: {usage.get('current_day', {}).get('credits_used', '—')}\n"
+            f"🗓 Этот месяц:\n"
+            f"  • Кредитов использовано: {usage.get('current_month', {}).get('credits_used', '—')}\n"
+            f"  • Осталось кредитов: {usage.get('current_month', {}).get('credits_left', '—')}"
+        )
+
+        message = (
+            f"🔐 Статус ключа: активен ✅\n\n"
+            f"⏱ Время запроса:\n{timestamp}\n\n"
+            f"{plan_text}\n\n"
+            f"{usage_text}"
+        )
+
+        return message
 
 class CurrencyStrategies(BaseCurrencyAPI):
     def __init__(self):

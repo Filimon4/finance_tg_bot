@@ -5,6 +5,8 @@ from pydantic import BaseModel, Field
 from sqlalchemy import and_, extract, func, select, text
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
+from src.db.models.CashAccount import CashAccount
+from src.db.models.Category import Category
 from src.db.models.Account import Account
 from src.modules.finance.cashAccounts.cashAccountRepository import CashAccountRepository
 from src.db.models.Operations import Operations
@@ -46,7 +48,6 @@ class OperationsRepository:
 
             offset = (max(page, 1) - 1) * limit
             operations = query.offset(offset).limit(limit).all()
-            
             return {
                 "operations": operations,
                 "page": page,

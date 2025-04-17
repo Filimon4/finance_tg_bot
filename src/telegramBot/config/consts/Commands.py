@@ -26,4 +26,7 @@ Commands = {
     BotCommand(
         command=f'/{BotTgCommands.API_STATUS.value}', description="Статус api"
     ),
+    BotCommand(
+        command=f'/{BotTgCommands.HELP.value}', description="Помощь"
+    )
 }

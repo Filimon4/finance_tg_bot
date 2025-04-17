@@ -1,11 +1,17 @@
 from ..enums.BotTgCommands import BotTgCommands
-from aiogram.types import KeyboardButton
+from aiogram.types import KeyboardButton, InlineKeyboardButton, WebAppInfo
 
 KeyboardButtons = {
     BotTgCommands.START: [
-        [
-            KeyboardButton(text="Нажми меня"),
-            KeyboardButton(text="Нажми меня тоже"),
-        ]
+      
+    ]
+}
+
+InlineKeyboardButtons = {
+  BotTgCommands.START: [
+    [InlineKeyboardButton(text="Панель админа", callback_data='admin_panel')]
+  ],
+  BotTgCommands.HELP: [
+        [InlineKeyboardButton(text="Открыть приложение", web_app=WebAppInfo(url="https://finance-tg-miniapp.netlify.app")),]
     ]
 }
