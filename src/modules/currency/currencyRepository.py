@@ -8,6 +8,39 @@ from src.db.models import Currency, ExchangeRate
 from sqlalchemy.exc import SQLAlchemyError
 
 class CurrencyRepository:
+    #region Cache
+    _currencies = {}
+    _exchange_rates = {}
+    _loaded = False
+
+    @classmethod
+    def load(cls, session: Session):
+        if not cls._loaded:
+            cls._currencies = {
+                c.code: c for c in session.query(Currency).all()
+            }
+            cls._exchange_rates = {
+                (r.from_currency_id, r.to_currency_id): r
+                for r in session.query(ExchangeRate).all()
+            }
+            cls._loaded = True
+
+    @classmethod
+    def get_currency_by_code(cls, code):
+        return cls._currencies.get(code)
+
+    @classmethod
+    def get_rate(cls, from_id, to_id):
+        return cls._exchange_rates.get((from_id, to_id))
+
+    @classmethod
+    def clear(cls):
+        cls._loaded = False
+        cls._currencies = {}
+        cls._exchange_rates = {}
+
+    #region Queries
+
     @staticmethod
     def sync_currency_rates(session: Session, base: str, rates: List[Dict[str, str]]):
         try:
@@ -27,24 +60,16 @@ class CurrencyRepository:
 
 
     @staticmethod
-    def get_currency_rate(session, base, to_currency):
-        base_currency = session.query(ExchangeRate).filter(ExchangeRate.code == base).first()
-        to_currency_obj = session.query(ExchangeRate).filter(ExchangeRate.code == to_currency).first()
+    def get_currency_rate(session: Session, base_id, to_currency_id):
+        currency_rate = session.query(ExchangeRate).filter(ExchangeRate.from_currency_id == base_id, ExchangeRate.to_currency_id == to_currency_id).first()
 
-        if not base_currency or not to_currency_obj:
+        if not currency_rate:
             return None
         
-        latest_rate = session.query(ExchangeRate).filter(
-            ExchangeRate.from_currency_id == base_currency.id,
-            ExchangeRate.to_currency_id == to_currency_obj.id
-        ).order_by(ExchangeRate.created_at.desc()).first()
-
-        if latest_rate:
-            return {
-                'rate': float(latest_rate.rate),
-                'updated_at': latest_rate.created_at
-            }
-        return None
+        return {
+            'rate': float(currency_rate.rate),
+            'updated_at': currency_rate.created_at
+        }
 
     @staticmethod
     def get_or_create_currency(session: Session, symbol: str, code: str, name: str, symbol_native: str) -> Currency:

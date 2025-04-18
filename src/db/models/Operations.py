@@ -20,10 +20,12 @@ class Operations(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255))
-    cash_account_id = Column(Integer, ForeignKey("cash_account.id", ondelete="CASCADE"), nullable=False)
-    to_cash_account_id = Column(Integer, ForeignKey("cash_account.id", ondelete="SET NULL"), nullable=True)
     category_id = Column(Integer, ForeignKey("category.id", ondelete="SET NULL"), nullable=True)
     account_id = Column(Integer, ForeignKey("account.id"), nullable=True)
+    cash_account_id = Column(Integer, ForeignKey("cash_account.id", ondelete="CASCADE"), nullable=False)
+    to_cash_account_id = Column(Integer, ForeignKey("cash_account.id", ondelete="SET NULL"), nullable=True)
+    exchange_rate = Column(Numeric(15,2), server_default=None, default=None, nullable=True)
+    linked_operation_id = Column(Integer, ForeignKey("operations.id", ondelete="CASCADE"), nullable=True)
 
     # Relationships
     cash_account = relationship(

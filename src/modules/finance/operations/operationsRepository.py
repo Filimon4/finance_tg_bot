@@ -5,6 +5,8 @@ from pydantic import BaseModel, Field
 from sqlalchemy import and_, extract, func, select, text
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
+from src.db.models.Currency import Currency
+from src.modules.currency.currencyRepository import CurrencyRepository
 from src.db.models.CashAccount import CashAccount
 from src.db.models.Category import Category
 from src.db.models.Account import Account
@@ -61,6 +63,46 @@ class OperationsRepository:
             raise Exception(e)
 
     @staticmethod
+    def create_linked_transfer_operation(session: Session, original_operation: Operations):
+        from_account = session.query(CashAccount).filter(CashAccount.id == original_operation.cash_account_id).first()
+        to_account = session.query(CashAccount).filter(CashAccount.id == original_operation.to_cash_account_id).first()
+
+        if not from_account or not to_account:
+            raise ValueError("Невозможно найти счета для перевода")
+
+        if from_account.currency_id == to_account.currency_id:
+            exchange_rate = 1
+            converted_amount = original_operation.amount
+        else:
+            print('from_account: ', from_account.currency_id, from_account.currency.code)
+            print('to_account: ', to_account.currency_id, to_account.currency.code)
+            rate = CurrencyRepository.get_currency_rate(session, from_account.currency_id, to_account.currency_id)
+            print('rate: ', rate)
+            if not rate:
+                raise ValueError("Не удалось получить курс валют")
+            exchange_rate = rate['rate']
+            converted_amount = original_operation.amount * exchange_rate
+
+        linked_operation = Operations(
+            account_id=original_operation.account_id,
+            name=original_operation.name or '',
+            cash_account_id=original_operation.to_cash_account_id,
+            category_id=None,
+            to_cash_account_id=None,
+            amount=converted_amount,
+            exchange_rate=exchange_rate,
+            type=OperationType.INCOME,
+            linked_operation_id=original_operation.id,
+            description=f"Перевод с {from_account.name}",
+            created_at=original_operation.created_at
+        )
+        session.add(linked_operation)
+        session.flush()
+        
+        # Обратная связь
+        original_operation.linked_operation_id = linked_operation.id
+
+    @staticmethod
     def create( session: Session, data: OperationCreateDTO):
         try:
             if data.to_cash_account_id is not None and data.category_id is not None:
@@ -82,6 +124,11 @@ class OperationsRepository:
             }
             operation = Operations(**operationData)
             session.add(operation)
+            session.flush()
+
+            if data.type == OperationType.TRANSFER and data.to_cash_account_id:
+                OperationsRepository.create_linked_transfer_operation(session, operation)
+
             session.commit()
             return operation
         except SQLAlchemyError as e:
@@ -151,6 +198,9 @@ class OperationsRepository:
             operation = session.query(Operations).filter(Operations.id == data.id).first()
             if not operation: raise Exception("There is not operation")
 
+            is_now_transfer = data.type == OperationType.TRANSFER
+            was_transfer = operation.type == OperationType.TRANSFER
+
             if data.to_cash_account_id is not None and data.category_id is not None:
                 raise ValueError("Недопустимые данные: to_cash_account_id и category_id не могут быть заполнены одновременно")
             
@@ -158,21 +208,42 @@ class OperationsRepository:
                 raise ValueError("Недопустимые данные: to_cash_account_id может быть указан только для операций типа TRANSFER")
 
             if hasattr(data, 'amount'):
-                operation.amount = data.amount if data.amount is not None else operation.amount
+                operation.amount = data.amount if data.amount is not None else None
             if hasattr(data, 'cash_account_id'):
-                operation.cash_account_id = data.cash_account_id if data.cash_account_id is not None else operation.cash_account_id
+                operation.cash_account_id = data.cash_account_id if data.cash_account_id is not None else None
             if hasattr(data, 'to_cash_account_id'):
-                operation.to_cash_account_id = data.to_cash_account_id if data.to_cash_account_id is not None else operation.to_cash_account_id
+                operation.to_cash_account_id = data.to_cash_account_id if data.to_cash_account_id is not None else None
             if hasattr(data, 'category_id'):
-                operation.category_id = data.category_id if data.category_id is not None else operation.category_id
+                operation.category_id = data.category_id if data.category_id is not None else None
             if hasattr(data, 'description'):
-                operation.description = data.description if data.description is not None else operation.description
+                operation.description = data.description if data.description is not None else None
             if hasattr(data, 'type'):
-                operation.type = data.type if data.type is not None else operation.type
+                operation.type = data.type if data.type is not None else None
             if hasattr(data, 'name'):
-                operation.name = data.name if data.name is not None else operation.name
+                operation.name = data.name if data.name is not None else None
             if hasattr(data, 'date'):
-                operation.created_at = str(data.date) if str(data.date) is not None else operation.created_at
+                operation.created_at = str(data.date) if str(data.date) is not None else None
+
+            print('was_transfer: ', was_transfer)
+            print('is_now_transfer: ', is_now_transfer)
+
+            if was_transfer and (not is_now_transfer or data.to_cash_account_id is None):
+                if operation.linked_operation_id:
+                    linked = session.query(Operations).filter(Operations.id == operation.linked_operation_id).first()
+                    if linked:
+                        session.delete(linked)
+                    operation.to_cash_account_id = None
+                    operation.linked_operation_id = None
+
+            if is_now_transfer and data.to_cash_account_id:
+                if operation.linked_operation_id:
+                    linked = session.query(Operations).filter(Operations.id == operation.linked_operation_id).first()
+                    if linked:
+                        session.delete(linked)
+                    operation.linked_operation_id = None
+                session.flush()
+                OperationsRepository.create_linked_transfer_operation(session, operation)
+
 
             session.commit()
             return operation
@@ -180,10 +251,11 @@ class OperationsRepository:
             raise Exception(e)
     
     @staticmethod
-    def delete(session: Session, oper_id: int):
+    def delete(session: Session, id: int):
         try:
-            operation = session.query(Operations).filter(Operations.id == oper_id).first()
+            operation = session.query(Operations).filter(Operations.id == id).first()
             if not operation: raise Exception("There is not operation")
+
             session.delete(operation)
             session.commit()
             return True

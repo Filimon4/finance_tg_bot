@@ -20,6 +20,9 @@ class CurrencySystem:
             self._task = asyncio.create_task(self._run_periodically())
 
     async def _run_periodically(self):
+      with DB.get_session() as session:
+        CurrencyRepository.clear()
+        CurrencyRepository.load(session)
       while not self._stop_event.is_set():
           await asyncio.sleep(self._fetch_interval)
           try:
@@ -58,6 +61,9 @@ class CurrencySystem:
           except SQLAlchemyError as e:
             logger.error(f"{str(e)}")
         session.commit()
+        # Обновление кэша
+        CurrencyRepository.clear()
+        CurrencyRepository.load(session)
 
     def updateApiRates(self, api):
       with DB.get_session() as session:
@@ -72,5 +78,8 @@ class CurrencySystem:
           except SQLAlchemyError as e:
             logger.error(f"{str(e)}")
         session.commit()
-    
+        # Обновление кэша
+        CurrencyRepository.clear()
+        CurrencyRepository.load(session)
+
 CurrencySys = CurrencySystem()

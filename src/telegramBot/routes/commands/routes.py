@@ -180,12 +180,12 @@ async def send_help(message: Message):
             "🔹 /start — Запуск бота и приветственное сообщение\n"
             "🔹 /help — Показать это сообщение помощи\n"
             "🔹 /export — Экспортировать данные\n"
-            "🔹 /check_all_reminders — Проверка всех напоминаний\n"
-            "🔹 /updtate_all_currency — Обновить все валюты (есть опечатка в названии)\n"
-            "🔹 /update_currency — Обновить конкретную валюту\n"
-            "🔹 /update_currency_rates — Обновить курсы валют\n"
-            "🔹 /all_third_apis — Показать все сторонние API\n"
-            "🔹 /api_status — Проверить статус API\n\n"
+            # "🔹 /check_all_reminders — Проверка всех напоминаний\n"
+            # "🔹 /updtate_all_currency — Обновить все валюты (есть опечатка в названии)\n"
+            # "🔹 /update_currency — Обновить конкретную валюту\n"
+            # "🔹 /update_currency_rates — Обновить курсы валют\n"
+            # "🔹 /all_third_apis — Показать все сторонние API\n"
+            # "🔹 /api_status — Проверить статус API\n\n"
             "ℹ️ Все команды можно вызывать с символом '/' в начале.\n"
         )
 

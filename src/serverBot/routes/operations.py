@@ -129,10 +129,10 @@ async def createOperation(data: OperationCreateDTO):
         )
 
 @app.delete("/api/operations", tags=['Operations'])
-async def deleteOperation(oper_id: int = Query(None)):
+async def deleteOperation(id: int = Query(None)):
     try:
         with DB.get_session() as session:
-            deleted = OperationsRepository.delete(session, oper_id)
+            deleted = OperationsRepository.delete(session, id)
             if not deleted: raise Exception('Failed to delete')
             
             return JSONResponse(
