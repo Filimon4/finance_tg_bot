@@ -21,13 +21,13 @@ from ..index import Base
 class ReminderCreateDTO(BaseModel):
     account_id: int
     day_of_week: DayOfWeek
-    hour: str
+    hour: int
     is_active: bool
 
 class ReminderUpdateDTO(BaseModel):
     id: int
     day_of_week: DayOfWeek | None
-    hour: str | None
+    hour: int | None
     is_active: bool | None
 
 class Reminder(Base):
