@@ -20,6 +20,9 @@ class UpdateCashAccount(BaseModel):
     id: int
     name: str
 
+class UpdateMainAccount(BaseModel):
+    id: int
+
 class DeleteCashAccount(BaseModel):
     id: int
     
@@ -59,6 +62,14 @@ class CashAccountRepository:
             return None
 
     @staticmethod
+    def getMain(session: Session, user_id: int):
+        try:
+            return session.query(CashAccount).filter(CashAccount.account_id == user_id, CashAccount.main == True).one()
+        except SQLAlchemyError as e:
+            logger.error(f"Ошибка при получении аккаунта: {str(e)}")
+            return None
+    
+    @staticmethod
     def get(session: Session, id: int):
         try:
             query = select(CashAccount).where(CashAccount.id == id)
@@ -73,6 +84,23 @@ class CashAccountRepository:
         try:
             return session.query(CashAccount).filter(CashAccount.main == True, CashAccount.account_id == tg_id).first()
         except SQLAlchemyError as e:
+            return None
+        
+    @staticmethod
+    def setMain(session: Session, tg_id: int, id: int):
+        try:
+            session.query(CashAccount).filter(CashAccount.account_id == tg_id).update({CashAccount.main: False})
+
+            account = session.query(CashAccount).filter(CashAccount.id == id, CashAccount.account_id == tg_id).first()
+            if not account:
+                raise Exception("Счёт не найден или не принадлежит пользователю")
+
+            account.main = True
+            session.commit()
+            return account
+        except SQLAlchemyError as e:
+            session.rollback()
+            logger.error(f"Ошибка при установке основного счёта: {str(e)}")
             return None
 
     @staticmethod

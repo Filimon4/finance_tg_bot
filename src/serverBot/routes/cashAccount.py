@@ -3,7 +3,7 @@ from fastapi import HTTPException, Query
 from fastapi.responses import JSONResponse
 from sqlalchemy import Result, Select, func, select
 from src.modules.finance.types import OperationType
-from src.modules.finance.cashAccounts.cashAccountRepository import CashAccountCreate, CashAccountRepository, DeleteCashAccount, UpdateCashAccount
+from src.modules.finance.cashAccounts.cashAccountRepository import CashAccountCreate, CashAccountRepository, DeleteCashAccount, UpdateCashAccount, UpdateMainAccount
 from src.db.models.CashAccount import CashAccount
 from src.db.models.Operations import Operations
 from src.db.index import DB
@@ -29,6 +29,29 @@ async def getCashAccounts(tg_id: int = Query(None), page: int = 0, limit: int = 
             return JSONResponse(
                 status_code=200,  # Исправлено с 500 на 200 (успешный запрос)
                 content={"success": True, "all": account_data}
+            )
+    except Exception as e:
+        logger.error(f"Error in getCashAccounts: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": str(e)}
+        )
+            
+@app.get("/api/cash_accounts/main", tags=['Cash Account'], description='Получить основной счёт')
+async def getMainCashAccounts(tg_id: int = Query(None), page: int = 0, limit: int = 100):
+    try:
+        with DB.get_session() as session:
+            account = CashAccountRepository.getMain(session, tg_id)
+            account_data = {
+                "id": account.id,
+                "name": account.name,
+                "account_id": account.account_id,
+                "currency_id": account.currency_id,
+                "created_at": str(account.created_at),
+            }
+            return JSONResponse(
+                status_code=200,
+                content={"success": True, "main": account_data}
             )
     except Exception as e:
         logger.error(f"Error in getCashAccounts: {str(e)}")
@@ -193,6 +216,31 @@ async def updateCashAccount(account_data: UpdateCashAccount):
           status_code=500,
           content={"success": False, "error": str(e)}
       )
+    
+@app.patch("/api/cash_accounts/main", tags=['Cash Account'], description='Получить основной счёт')
+async def setMainCashAccount(data: UpdateMainAccount, tg_id: int = Query(None)):
+    try:
+        with DB.get_session() as session:
+            account = CashAccountRepository.getMain(session, tg_id)
+            if account.id == data.id: return 
+            newMainAccount = CashAccountRepository.setMain(session, tg_id, data.id)
+            account_data = {
+                "id": newMainAccount.id,
+                "name": newMainAccount.name,
+                "account_id": newMainAccount.account_id,
+                "currency_id": newMainAccount.currency_id,
+                "created_at": str(newMainAccount.created_at),
+            }
+            return JSONResponse(
+                status_code=200,
+                content={"success": True, "main": account_data}
+            )
+    except Exception as e:
+        logger.error(f"Error in getCashAccounts: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": str(e)}
+        )
 
 @app.delete("/api/cash_accounts", tags=['Cash Account'], description='Удалить кассовый счет')
 async def deleteCashAccount(data: DeleteCashAccount):

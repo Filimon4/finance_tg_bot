@@ -8,8 +8,42 @@ from src.modules.finance.operations.operationsRepository import OperationCreateD
 
 from ..index import app
 
+@app.get("/api/operations/main_cash_account_operations", tags=['Operations'])
+async def getCategoryOperations(tg_id: int = Query(None), page: int = Query(1), limit: int = Query(200)):
+    try:
+        with DB.get_session() as session:
+            mainCashAccount = CashAccountRepository.getMain(session, tg_id)
+            if not mainCashAccount: raise Exception('There is not main account')
+            operations = OperationsRepository.getOperationsByCashAccount(session, mainCashAccount.id, page, limit)
+            operations_data = [{
+                'id': op.id,
+                'name': op.name,
+                'cash_account_id': op.cash_account_id,
+                'to_cash_account_id': op.to_cash_account_id,
+                'category_id': op.category_id,
+                'amount': float(op.amount),
+                'description': op.description,
+                'type': op.type.name,
+                'created_at': str(op.created_at),
+            } for op in operations['operations']]
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "operations": operations_data, 
+                    "success": True,
+                    "page": page,
+                    "limit": limit,
+                    "total": operations['total']
+                },
+            )
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": str(e)}
+        )
+    
 @app.get("/api/operations/cash_account_operations", tags=['Operations'])
-async def getCategoryOperations(cash_account_id: int = Query(None), page: int = Query(1), limit: int = Query(100)):
+async def getCategoryOperations(cash_account_id: int = Query(None), page: int = Query(1), limit: int = Query(200)):
     try:
         with DB.get_session() as session:
             operations = OperationsRepository.getOperationsByCashAccount(session, cash_account_id, page, limit)
@@ -41,7 +75,7 @@ async def getCategoryOperations(cash_account_id: int = Query(None), page: int = 
         )
     
 @app.get("/api/operations", tags=['Operations'])
-async def getOperations(tg_id: int = Query(None), page: int = Query(1), limit: int = Query(100)):
+async def getOperations(tg_id: int = Query(None), page: int = Query(1), limit: int = Query(200)):
     try:
         with DB.get_session() as session:
             operations = OperationsRepository.getOperations(session, tg_id, page, limit)
