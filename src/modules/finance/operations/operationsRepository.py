@@ -32,6 +32,7 @@ class OperationUpdateDTO(BaseModel):
     amount: int | None
     description: str | None
     type: OperationType | None
+    date: datetime.datetime
 
 class OperationsRepository:
     
@@ -157,19 +158,21 @@ class OperationsRepository:
                 raise ValueError("Недопустимые данные: to_cash_account_id может быть указан только для операций типа TRANSFER")
 
             if hasattr(data, 'amount'):
-                operation.amount = data.amount if data.amount is not None else None
+                operation.amount = data.amount if data.amount is not None else operation.amount
             if hasattr(data, 'cash_account_id'):
-                operation.cash_account_id = data.cash_account_id if data.cash_account_id is not None else None
+                operation.cash_account_id = data.cash_account_id if data.cash_account_id is not None else operation.cash_account_id
             if hasattr(data, 'to_cash_account_id'):
-                operation.to_cash_account_id = data.to_cash_account_id if data.to_cash_account_id is not None else None
+                operation.to_cash_account_id = data.to_cash_account_id if data.to_cash_account_id is not None else operation.to_cash_account_id
             if hasattr(data, 'category_id'):
-                operation.category_id = data.category_id if data.category_id is not None else None
+                operation.category_id = data.category_id if data.category_id is not None else operation.category_id
             if hasattr(data, 'description'):
-                operation.description = data.description if data.description is not None else None
+                operation.description = data.description if data.description is not None else operation.description
             if hasattr(data, 'type'):
-                operation.type = data.type if data.type is not None else None
+                operation.type = data.type if data.type is not None else operation.type
             if hasattr(data, 'name'):
-                operation.name = data.name if data.name is not None else None
+                operation.name = data.name if data.name is not None else operation.name
+            if hasattr(data, 'date'):
+                operation.created_at = data.date if data.date is not None else operation.created_at
 
             session.commit()
             return operation
