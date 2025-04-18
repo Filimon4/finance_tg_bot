@@ -124,7 +124,6 @@ class RemindersRepository:
   @staticmethod
   def update(session: Session, data: ReminderUpdateDTO):
     try:
-      next_time = RemindersRepository.calculateNextTime(data.day_of_week, int(data.hour))
       reminder = session.query(Reminder).where(Reminder.id == data.id).one()
       if not reminder: raise Exception('There is not reminder')
       
@@ -134,8 +133,7 @@ class RemindersRepository:
         reminder.hour = data.hour if not None else None
       if hasattr(data, 'is_active'):
         reminder.is_active = data.is_active
-
-      reminder.next_time = next_time
+      reminder.next_time = RemindersRepository.calculateNextTime(data.day_of_week, int(data.hour))
 
       session.commit()
       return reminder
