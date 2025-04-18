@@ -172,7 +172,7 @@ class OperationsRepository:
             if hasattr(data, 'name'):
                 operation.name = data.name if data.name is not None else operation.name
             if hasattr(data, 'date'):
-                operation.created_at = data.date if data.date is not None else operation.created_at
+                operation.created_at = str(data.date) if str(data.date) is not None else operation.created_at
 
             session.commit()
             return operation
