@@ -74,10 +74,7 @@ class OperationsRepository:
             exchange_rate = 1
             converted_amount = original_operation.amount
         else:
-            print('from_account: ', from_account.currency_id, from_account.currency.code)
-            print('to_account: ', to_account.currency_id, to_account.currency.code)
             rate = CurrencyRepository.get_currency_rate(session, from_account.currency_id, to_account.currency_id)
-            print('rate: ', rate)
             if not rate:
                 raise ValueError("Не удалось получить курс валют")
             exchange_rate = rate['rate']
