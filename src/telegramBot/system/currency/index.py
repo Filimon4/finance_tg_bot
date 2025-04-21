@@ -1,7 +1,6 @@
 import asyncio
 import logging
 from typing import Optional
-import schedule
 from src.modules.currency.index import CurrencyEnum, CurrencyManager
 from src.modules.currency.currencyRepository import CurrencyRepository
 from src.db.index import DB
