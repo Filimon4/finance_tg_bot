@@ -1,6 +1,6 @@
 from asyncio.log import logger
 from fastapi import HTTPException
-from sqlalchemy import Result, Select, func, select
+from sqlalchemy import Result, Select, func, select, or_
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -135,7 +135,13 @@ class CashAccountRepository:
             )
             total_expenses = (
                 session.query(func.sum(Operations.amount))
-                .filter(Operations.cash_account_id == id, Operations.type == OperationType.EXPENSIVE)
+                .filter(
+                    Operations.cash_account_id == id,
+                    or_(
+                        Operations.type == OperationType.EXPENSIVE,
+                        Operations.type == OperationType.TRANSFER
+                    )
+                )
                 .scalar() or 0
             )
             return {

@@ -12,5 +12,5 @@ class ExchangeRate(Base):
     )
     to_currency_id = Column(Integer, ForeignKey("currency.id"), nullable=False)
 
-    rate = Column(Numeric(15, 2))
+    rate = Column(Numeric(15, 8))
     created_at = Column(TIMESTAMP, default=func.now())

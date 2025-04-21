@@ -34,10 +34,19 @@ async def start(message: Message):
     tg_id = message.from_user.id
     if not tg_id:
         return
+    isAdmin = False
     with DB.get_session() as session:
-        AccountRepository.getOrCreateUserById(session, tg_id)
-    await message.answer(text="Спасибо что пользуетесь нашим приложением")
+        user = AccountRepository.getOrCreateUserById(session, tg_id)
+        if user.admin == True:
+            isAdmin = True
 
+    if isAdmin:
+        buttons = InlineKeyboardButtons["admin"]
+        keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
+        await message.answer(text="Привет Админ", reply_markup=keyboard)
+    else:
+        await message.answer(text="Спасибо что пользуетесь нашим приложением")
+    
 @BotDispatcher.message(Command(commands=BotTgCommands.EXPORT.value))
 async def export(message: Message):
     try:
@@ -174,7 +183,6 @@ async def send_api_status(message: Message):
 @BotDispatcher.message(Command(commands=BotTgCommands.HELP.value))
 async def send_help(message: Message):
     try:
-        # TODO: Поменять когда добавится панель админа
         help_text = (
             "🤖 <b>Доступные команды:</b>\n\n"
             "🔹 /start — Запуск бота и приветственное сообщение\n"

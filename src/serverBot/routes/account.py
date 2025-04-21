@@ -40,7 +40,6 @@ def balance(tg_id: int = Query(None)):
     try:
         with DB.get_session() as session:
             accountBalanceOverview = AccountRepository.getAccountOverview(session, tg_id)
-            
             return JSONResponse(
                 content={
                     "success": True,
