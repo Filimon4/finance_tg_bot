@@ -6,11 +6,14 @@ from aiogram.types import Message, ReplyKeyboardRemove
 from src.telegramBot import BotDispatcher
 
 class SurveyFactory:
-    def __init__(self, chatId: int, firstState: State):
+    def __init__(self, chat_id: int, firstState: State):
         self.first_state = firstState
-        self.chat_id = chatId
+        self.chat_id = chat_id
         self.router = Router()
         BotDispatcher.include_router(self.router)
+
+    def setChatId(self, chat_id: int):
+        self.chat_id = chat_id
 
     async def start(self, state: FSMContext):
         await state.set_state(self.first_state)

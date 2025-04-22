@@ -13,10 +13,10 @@ class ApiStatusGroup(StatesGroup):
 
 class ApiStatusSurvey(SurveyFactory):
   
-  def __init__(self, chat_id: int):
+  def __init__(self, chat_id):
     super().__init__(chat_id, ApiStatusGroup.api_type)
     self.registerHandlers()
-
+    
   def registerHandlers(self):
     @self.router.callback_query(ApiStatusGroup.api_type)
     async def apiTypeCallback(callback_query: CallbackQuery, state: FSMContext):
@@ -31,7 +31,6 @@ class ApiStatusSurvey(SurveyFactory):
 
   async def start(self, state: FSMContext):
     await super().start(state)
-
     buttons = [[InlineKeyboardButton(text=button, callback_data=button) for button in CurrencyEnum.get_list()]]
     keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
     await MainBotTg.send_message(self.chat_id, text='Выберете тип api', reply_markup=keyboard)

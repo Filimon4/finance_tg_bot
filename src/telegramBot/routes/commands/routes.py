@@ -25,7 +25,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from src.telegramBot.system.currency.index import CurrencySys
 from src.telegramBot.config.consts.KeyboardButtons import InlineKeyboardButtons
-from src.telegramBot.survey.surveys.ApiStatus import ApiStatusSurvey
+from src.telegramBot.survey import ApiStatusSurvey, CurrencyUpdateSurvey, RateUpdateSurvey 
 
 @BotDispatcher.message(Command(commands=BotTgCommands.START.value))
 async def start(message: Message):
@@ -85,7 +85,6 @@ async def inline_operations(message: Message):
     except Exception as e:
         await message.answer(text=f"Ошибка при добавлении операции")
 
-
 async def send_all_reminders(chatId: int):
     try:
         await Reminder.startFetching()
@@ -104,11 +103,10 @@ async def update_all_currency(chatId: int):
     except Exception as e:
         await MainBotTg.send_message(text=f"Ошибка обновления валют")
 
-async def update_currency(chatId: int):
+async def update_currency(chatId: int, state: FSMContext):
     try:
-        # CurrencySys.updateApiCurrencies(api_type)
-        await MainBotTg.send_message(text=f"Обновление валюты завершено", chat_id=chatId)
-        pass
+        surveyEntity = CurrencyUpdateSurvey(chat_id=chatId)
+        await surveyEntity.start(state)
     except SQLAlchemyError as e:
         logger.error(f"{str(e)}")
         await MainBotTg.send_message(text=f"Ошибка обновления валют")
@@ -116,12 +114,10 @@ async def update_currency(chatId: int):
         logger.error(f"{str(e)}")
         await MainBotTg.send_message(text=f"Ошибка обновления валют")
 
-async def update_currency_rates(chatId: int):
+async def update_currency_rates(chatId: int, state: FSMContext):
     try:
-        
-        # CurrencySys.updateApiRates(api_type)
-        # await MainBotTg.send_message(text=f"Курсы валют {api_type} обновлены")
-        pass
+        surveyEntity = RateUpdateSurvey(chat_id=chatId)
+        await surveyEntity.start(state)
     except SQLAlchemyError as e:
         logger.error(f"{str(e)}")
         await MainBotTg.send_message(text=f"Ошибка обновления курсов")
@@ -181,11 +177,11 @@ async def handle_callback(callback_query: CallbackQuery, state: FSMContext):
     if data == "check_all_reminders":
         await send_all_reminders(chatId=userId)
     elif data == "update_currency":
-        await update_currency(chatId=userId)
+        await update_currency(chatId=userId, state=state)
     elif data == "update_all_currency":
         await update_all_currency(chatId=userId)
     elif data == "update_currency_rates":
-        await update_currency_rates(chatId=userId)
+        await update_currency_rates(chatId=userId, state=state)
     elif data == "all_third_apis":
         await send_all_api(chatId=userId)
     elif data == "api_status":

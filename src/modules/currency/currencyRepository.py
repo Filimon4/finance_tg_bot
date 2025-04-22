@@ -192,7 +192,6 @@ class CurrencyRepository:
                     None
                 )
                 if not usdPair:
-                    logger.error(f"No USD pair found for {curr.symbol}")
                     continue
 
                 unExistCurrencyPairs: List[Currency] = [
@@ -202,7 +201,6 @@ class CurrencyRepository:
                     )
                 ]
                 if not unExistCurrencyPairs or len(unExistCurrencyPairs) == 0:
-                    logger.error(f"All pairs exist for {curr.symbol}")
                     continue
 
                 for unExistPair in unExistCurrencyPairs:
@@ -219,7 +217,7 @@ class CurrencyRepository:
                     except (ZeroDivisionError, ValueError) as e:
                         logger.error(f"Failed to calculate rate for {curr.symbol}/{unExistPair.symbol}: {e}")
                         continue
-            session.commit() 
+            session.commit()
         except SQLAlchemyError as e:
             raise Exception(e)
         except Exception as e:
