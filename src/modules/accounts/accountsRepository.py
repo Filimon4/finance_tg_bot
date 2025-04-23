@@ -1,6 +1,7 @@
 from asyncio.log import logger
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import SQLAlchemyError
 from src.modules.finance.cashAccounts.cashAccountRepository import CashAccountRepository
 from src.db.models.Operations import Operations
 from src.db.models.CashAccount import CashAccount
@@ -20,6 +21,9 @@ class AccountRepository:
             return user
         except Exception as e:
             logger.error(f"{str(e)}")
+            return None
+        except SQLAlchemyError as e:
+            logger.error(f"Ошибка при проверки пользователя: {str(e)}")
             return None
 
     @staticmethod

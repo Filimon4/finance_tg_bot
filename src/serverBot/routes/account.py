@@ -8,6 +8,14 @@ from src.modules.finance.operations.operationsRepository import OperationsReposi
 
 from ..index import app
 
+@app.get("/api/account/check_user_exist", tags=['Account'])
+def checkUserExist(tg_id: int = Query(None)):
+    try:
+        with DB.get_session() as session:
+            AccountRepository.getOrCreateUserById(session, tg_id)
+    except Exception as e:
+        logger.error(e)
+
 @app.get("/api/account/balance_six_month", tags=['Account'])
 def balanceSixM(tg_id: int = Query(None)):
     try:
