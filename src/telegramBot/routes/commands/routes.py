@@ -23,6 +23,8 @@ from aiogram.types import (
 from aiogram.fsm.context import FSMContext
 from sqlalchemy.exc import SQLAlchemyError
 
+from datetime import datetime
+
 from src.telegramBot.system.currency.index import CurrencySys
 from src.telegramBot.config.consts.KeyboardButtons import InlineKeyboardButtons
 from src.telegramBot.survey import ApiStatusSurvey, CurrencyUpdateSurvey, RateUpdateSurvey 
@@ -61,20 +63,28 @@ async def inline_operations(message: Message):
     try:
         userid = message.from_user.id
         with DB.get_session() as session:
-            sign, amount, category = message.text.split(" ")[0:3]
+            values = message.text.split(" ")[0:3]
+            sign, amount, *rest = values
             user = AccountRepository.getUserById(session, userid)
-            category = CategoryRepository.getByName(session, category)
             cashAccount = CashAccountRepository.getMain(session, user.id)
+            category = None
+
+            if len(rest) >= 1 and rest[0]:
+                category = CategoryRepository.getByName(session, user.id, rest[0])
+                if not category:
+                    await message.answer(text='Категория была не найдена')
+
 
             data = OperationCreateDTO(
                 account_id=user.id,
                 amount=amount,
-                category_id=category.id,
+                category_id=category.id if category is not None else None,
                 cash_account_id=cashAccount.id,
                 description='',
                 name='',
                 type=OperationType.INCOME if sign == '+' else OperationType.EXPENSIVE,
                 to_cash_account_id=None,
+                date=str(datetime.now())
             )
             operation = OperationsRepository.create(session,data)
             if not operation: raise Exception('Faile to create operation')
@@ -83,6 +93,7 @@ async def inline_operations(message: Message):
     except SQLAlchemyError as e:
         await message.answer(text=f"Ошибка при добавлении операции")
     except Exception as e:
+        print(e)
         await message.answer(text=f"Ошибка при добавлении операции")
 
 async def send_all_reminders(chatId: int):

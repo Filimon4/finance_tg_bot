@@ -52,9 +52,9 @@ class CategoryRepository:
             return None
         
     @staticmethod
-    def getByName(session: Session, name: str):
+    def getByName(session: Session, userId: int, name: str):
         try:
-            return session.query(Category).filter(Category.name == name).first()
+            return session.query(Category).filter(Category.name == name, Category.account_id == userId).first()
         except SQLAlchemyError as e:
             return None
         
