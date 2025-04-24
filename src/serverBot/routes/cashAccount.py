@@ -266,9 +266,16 @@ async def deleteCashAccount(data: DeleteCashAccount):
         account = session.query(CashAccount).filter(CashAccount.id == data.id).first()
         if not account:
             raise HTTPException(status_code=404, detail="Cash account not found")
-
         session.delete(account)
         session.commit()
+
+        mainAccount = CashAccountRepository.getMain(session, account.account_id)
+        if not mainAccount:
+            firstAccount = session.query(CashAccount).filter(CashAccount.account_id == account.account_id).first()
+            if firstAccount:
+               firstAccount.main = True
+               session.commit()
+
         return JSONResponse(
           status_code=200,
           content={"success": True, "message": "Cash account deleted successfully"}
