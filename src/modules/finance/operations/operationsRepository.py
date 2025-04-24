@@ -221,9 +221,6 @@ class OperationsRepository:
             if hasattr(data, 'date'):
                 operation.created_at = str(data.date) if str(data.date) is not None else None
 
-            print('was_transfer: ', was_transfer)
-            print('is_now_transfer: ', is_now_transfer)
-
             if was_transfer and (not is_now_transfer or data.to_cash_account_id is None):
                 if operation.linked_operation_id:
                     linked = session.query(Operations).filter(Operations.id == operation.linked_operation_id).first()

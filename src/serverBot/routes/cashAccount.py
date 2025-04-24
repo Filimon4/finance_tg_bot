@@ -27,7 +27,7 @@ async def getCashAccounts(tg_id: int = Query(None), page: int = 0, limit: int = 
                 for acc in accounts
             ]
             return JSONResponse(
-                status_code=200,  # Исправлено с 500 на 200 (успешный запрос)
+                status_code=200,
                 content={"success": True, "all": account_data}
             )
     except Exception as e:
@@ -42,6 +42,7 @@ async def getMainCashAccounts(tg_id: int = Query(None), page: int = 0, limit: in
     try:
         with DB.get_session() as session:
             account = CashAccountRepository.getMain(session, tg_id)
+            if not account: raise Exception("There is not main cash_account")
             account_data = {
                 "id": account.id,
                 "name": account.name,
@@ -222,7 +223,20 @@ async def setMainCashAccount(data: UpdateMainAccount, tg_id: int = Query(None)):
     try:
         with DB.get_session() as session:
             account = CashAccountRepository.getMain(session, tg_id)
-            if account.id == data.id: return 
+            if account:
+                if account.id == data.id:
+                    account_data = {
+                        "id": account.id,
+                        "name": account.name,
+                        "account_id": account.account_id,
+                        "currency_id": account.currency_id,
+                        "created_at": str(account.created_at),
+                    }
+                    return JSONResponse(
+                        status_code=200,
+                        content={"success": True, "main": account_data}
+                    )
+            
             newMainAccount = CashAccountRepository.setMain(session, tg_id, data.id)
             account_data = {
                 "id": newMainAccount.id,

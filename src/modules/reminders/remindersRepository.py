@@ -134,7 +134,6 @@ class RemindersRepository:
       if hasattr(data, 'is_active'):
         reminder.is_active = data.is_active
       reminder.next_time = RemindersRepository.calculateNextTime(data.day_of_week, int(data.hour))
-      print(reminder.next_time)
 
       session.commit()
       return reminder

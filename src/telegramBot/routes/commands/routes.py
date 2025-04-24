@@ -93,7 +93,6 @@ async def inline_operations(message: Message):
     except SQLAlchemyError as e:
         await message.answer(text=f"Ошибка при добавлении операции")
     except Exception as e:
-        print(e)
         await message.answer(text=f"Ошибка при добавлении операции")
 
 async def send_all_reminders(chatId: int):
