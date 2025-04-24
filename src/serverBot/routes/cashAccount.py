@@ -165,11 +165,14 @@ async def getSingleCashAccountOverview(id: int):
 async def createCashAccount(account_data: CashAccountCreate):
     try:
       with DB.get_session() as session:
+        mainAccount = CashAccountRepository.getMain(session, account_data.account_id)
         new_account = CashAccount(
           name=account_data.name,
           account_id=account_data.account_id,
           currency_id=account_data.currency_id
         )
+        if not mainAccount:
+           new_account.main = True
         session.add(new_account)
         session.commit()
         return JSONResponse(
